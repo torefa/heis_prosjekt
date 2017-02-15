@@ -1,16 +1,14 @@
 // The state machine for the elevator
-
-#define state
-
+#pragma once
 
 // Event button is pressed
-int evButtonPressed(){}
+void evButtonPressed(){}
 
 // Event floor is reached
-int evFloor_reached(){}
+void evFloor_reached(){}
 
 // Event timer has timed out
-int evTime_out(){}
+void evTime_out(){}
 
 // Event Stop button is pressed
-int evStop_button_signal(){}
+void evStop_button_signal(){}
