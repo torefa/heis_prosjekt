@@ -2,7 +2,7 @@
 //
 
 // Function to start the timer.
-int timer_start();
+void timer_start();
 
 // Funtion to notify that the time is out
 int time_out();

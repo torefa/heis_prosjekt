@@ -29,7 +29,7 @@ void evFloor_reached(){
 		el_state = S_AT_FLOOR;
 		
 		//erase floor from queue.
-		set_queue(current_floor);
+//		set_queue(current_floor);
 	}	
 }
 
