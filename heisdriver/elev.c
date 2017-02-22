@@ -68,6 +68,12 @@ void elev_set_motor_direction(elev_motor_direction_t dirn) {
     }
 }
 
+void elev_stop_motor(int current_dir){
+	elev_set_motor_direction(- current_dir); 		
+	delay(100); 													 
+	elev_set_motor_durection(0); 						
+}
+
 void elev_set_door_open_lamp(int value) {
     if (value)
         io_set_bit(LIGHT_DOOR_OPEN);
@@ -144,3 +150,5 @@ void elev_set_button_lamp(elev_button_type_t button, int floor, int value) {
     else
         io_clear_bit(lamp_channel_matrix[floor][button]);
 }
+
+
