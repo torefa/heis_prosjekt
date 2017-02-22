@@ -10,6 +10,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 // Number of signals and lamps on a per-floor basis (excl sensor)
 #define N_BUTTONS 3
@@ -70,8 +71,8 @@ void elev_set_motor_direction(elev_motor_direction_t dirn) {
 
 void elev_stop_motor(int current_dir){
 	elev_set_motor_direction(- current_dir); 		
-	delay(100); 													 
-	elev_set_motor_durection(0); 						
+	usleep(100); 													 
+	elev_set_motor_direction(0); 						
 }
 
 void elev_set_door_open_lamp(int value) {
