@@ -1,6 +1,6 @@
 #include<stdlib.h>
 #include "io.h"
-#include ""
+
 
 int get_sensor_status(){
 	
@@ -10,12 +10,13 @@ int get_button_status(){
 	
 }
 
-void set_floor_status(nt button){
+void set_floor_status(int button){
 	
 }
 
 void set_button_lamp(int lamp){
-	
+	elev_set_door_open_lamp(int lamp);
+	elev_set_stop_lamp();
 }
 
 void run_motor(int motor_dir){
