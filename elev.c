@@ -152,4 +152,11 @@ void elev_set_button_lamp(elev_button_type_t button, int floor, int value) {
         io_clear_bit(lamp_channel_matrix[floor][button]);
 }
 
+void elev_turn_off_button_lamp(int floor){
+	elev_set_button_lamp(BUTTON_CALL_DOWN, floor, 0);
+    elev_set_button_lamp(BUTTON_CALL_UP, floor, 0);
+	elev_set_button_lamp(BUTTON_COMMAND, floor, 0);
+
+}
+
 

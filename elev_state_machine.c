@@ -20,44 +20,61 @@ static ELState el_state = S_IDLE;
 void evFloor_reached(){
 	elev_set_floor_indicator(current_floor);
 	
-	if (queue[0] == current_floor){
+	
+	if (get_queue(current_floor, current_dir){
 		elev_stop_motor(current_dir);
 		timer_start();
 		elev_set_door_open_lamp(1);
-		elev_set_button_lamp(active_button, current_floor, 0);
+		
+		//Turn off button lamps for the floor
+		elev_turn_off_button_lamp(current_floor);
+		
 		
 		el_state = S_AT_FLOOR;
 		
 		//erase floor from queue.
-//		set_queue(current_floor);
+		delete_floor(current_floor);
 	}	
 }
 
 
 void evButton_pressed(){
-	elev_set_button_lamp(active_button);
-	set_queue(active_button_floor);
-	switch(el_state)
+	elev_set_button_lamp(active_button, active_button_floor, 1);
+	
+	if (current_floor > active_button){
+		set
+	
+	//tenger kanskje ikke switch her..
+	switch(el_state){
 	case S_IDLE
 		
 		break;
 	case S_MOVING
-		set_queue(active_button_floor);
 		
 		break;
 	case S_AT_FLOOR
-		set_queue(active_button_floor);
+		if (current_dir >0 && get_queue(current_floor, current_dir)){
+			elev_Set_motor_direction(DIRN_UP);
+			el_state = S_MOVING;
 		
-		el_state = S_MOVING;
+		}else if (current_dir < 0 && get_queue(current_floor, current_dir)){
+			elev_Set_motor_direction(DIRN_DOWN);
+			el_state = S_MOVING;
+		}
 		break;
+	}
 }
 
 void evTime_out(){
 	elev_set_door_open_lamp(0);
-	if (queue[0] - curretn_floor > 1){
+	if (current_dir >0 && get_queue(current_floor, current_dir)){
 		elev_Set_motor_direction(DIRN_UP);
+		el_state = S_MOVING;
+		
+	}else if (current_dir < 0 && get_queue(current_floor, current_dir)){
+		elev_Set_motor_direction(DIRN_DOWN);
+		el_state = S_MOVING;
 	}
-	
 }
 
 

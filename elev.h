@@ -122,5 +122,9 @@ int elev_get_button_signal(elev_button_type_t button, int floor);
 void elev_set_button_lamp(elev_button_type_t button, int floor, int value);
 
 
+/** 
+	Turn off all button lamps when the elvator stops at a floor.
+-*/
+void elev_turn_off_button_lamp(int floor);
 
 #endif // #ifndef __INCLUDE_DRIVER_H__
