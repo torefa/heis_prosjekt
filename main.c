@@ -6,28 +6,17 @@
 
 void poll_buttons();
 void poll_sensors();
-
+void poll_timer();
 
 int main() {
       // Initialize hardware
-    if (!elev_init()) {
-        printf("Unable to initialize elevator hardware!\n");
-        return 1;
-    }
-	
-    elev_set_motor_direction(motor_dir);
-	while(1){
-			if(elev_get_floor_sensor_signal() != -1){
-			elev_stop_motor(& motor_dir);
-			current_floor = elev_get_floor_sensor_signal();
-			break;
-		}
-	}
+	evInitialize();
 	
     while (1) {
 		
-		poll_buttons();
-		poll_sensors();
+		//poll_buttons();
+		//poll_sensors();
+		//poll_timer();
 		
         // Change direction when we reach top/bottom floor
         if (elev_get_floor_sensor_signal() == N_FLOORS - 1) {
@@ -69,7 +58,11 @@ void poll_sensors(){
 	}
 }
 
-
+void poll_timer(){
+	if(timer_time_out()){
+		evTime_out;
+	}
+}
 
 
 
