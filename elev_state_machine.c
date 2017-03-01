@@ -2,8 +2,9 @@
 
 #include "elev_state_machine.h"
 
-#include <sdtio.h>
+#include <stdio.h>
 
+#include "elev.h"
 #include "timer.h"
 #include "queue.h"
 
@@ -13,7 +14,7 @@ typedef enum {
 		S_AT_FLOOR,
 		S_STOPBUTTON,
 		S_STOPBUTTON_AT_FLOOR
-} ELState
+} ELState;
 
 static ELState el_state = S_IDLE;
 
@@ -25,7 +26,7 @@ void evInitialize(){
 	// Initialize hardware
     if (!elev_init()) {
         printf("Unable to initialize elevator hardware!\n");
-        return 1;
+		break;
     }
 	
 	//initialize elevator
