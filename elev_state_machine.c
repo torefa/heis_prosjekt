@@ -17,62 +17,73 @@ typedef enum {
 
 static ELState el_state = S_IDLE;
 
-void evFloor_reached(){
-	elev_set_floor_indicator(current_floor);
+static int current_floor;
+static int motor_dir = DIRN_UP;
+
+void evFloor_reached(int floor){
+	elev_set_floor_indicator(floor);
+	current_floor = floor;
 	
-	
-	if (get_queue(current_floor, current_dir){
-		elev_stop_motor(current_dir);
+	if (queue_get_queue(current_floor, motor_dir){
+		elev_stop_motor(motor_dir);
 		timer_start();
 		elev_set_door_open_lamp(1);
 		
 		//Turn off button lamps for the floor
-		elev_turn_off_button_lamp(current_floor);
+		elev_turn_off_button_lamp(floor);
 		
-		
+		//Set state
 		el_state = S_AT_FLOOR;
 		
 		//erase floor from queue.
-		delete_floor(current_floor);
+		queue_delete_floor(floor);
 	}	
 }
 
 
-void evButton_pressed(){
-	elev_set_button_lamp(active_button, active_button_floor, 1);
+void evButton_pressed(elev_button_type_t button, int floor){
+	elev_set_button_lamp(button, floor, 1);
 	
-	if (current_floor > active_button){
-		set
+	//Check button type and set the relevant queue
+	if (button == BUTTON_CALL_UP){
+		queue_set_up_queue(int floor);
+	} else if (button == BUTTON_CALL_DOWN){
+		queue_set_down_queue(floor);
+	} else if (button == BUTTON_COMMAND){
+		queue_set_queue(floor, current_floor);
+	}
 	
-	//tenger kanskje ikke switch her..
-	switch(el_state){
-	case S_IDLE
-		
+	//Start elevator in direction of button order if not already moving.
+	switch(el_state)
+	case S_MOVING:
 		break;
-	case S_MOVING
+	default:
 		
-		break;
-	case S_AT_FLOOR
-		if (current_dir >0 && get_queue(current_floor, current_dir)){
-			elev_Set_motor_direction(DIRN_UP);
+		if (current_dir > 0 && queue_get_queue(floor, motor_dir)){
+			elev_set_motor_direction(DIRN_UP);
+			motor_dir = DIRN_UP;
 			el_state = S_MOVING;
 		
-		}else if (current_dir < 0 && get_queue(current_floor, current_dir)){
-			elev_Set_motor_direction(DIRN_DOWN);
+		}else if (current_dir < 0 && queue_get_queue(floor, current_dir)){
+			elev_set_motor_direction(DIRN_DOWN);
+			motor_dir = DIRN_DOWN;
 			el_state = S_MOVING;
 		}
 		break;
 	}
 }
 
+//When time is out, close door and start elevator if there is any orders.
 void evTime_out(){
 	elev_set_door_open_lamp(0);
-	if (current_dir >0 && get_queue(current_floor, current_dir)){
+	if (current_dir >0 && queue_get_queue(current_floor, motor_dir)){
 		elev_Set_motor_direction(DIRN_UP);
+		motor_dir = DIRN_UP;
 		el_state = S_MOVING;
 		
-	}else if (current_dir < 0 && get_queue(current_floor, current_dir)){
+	}else if (current_dir < 0 && queue_get_queue(current_floor, motor_dir)){
 		elev_Set_motor_direction(DIRN_DOWN);
+		motor_dir = DIRN_DOWN;
 		el_state = S_MOVING;
 	}
 }
@@ -81,21 +92,23 @@ void evTime_out(){
 //Event for activated stop button
 void evStop_button_signal(){
 	
-	switch(el_state)
-	case S_MOVING
+	switch(el_state){
+	case S_MOVING:
 	// Stop motor, light stop button and erase queue.
-		elev_stop_motor(current_dir);
+		elev_stop_motor(motor_dir);
 		elev_set_stop_lamp(1);
-		set_queue();
+		queue_delete_queue();
 		el_state = S_STOPBUTTON;
 		break;
-	case S_AT_FLOOR
-		// Stop motor, light stop button, open door and erase queue.
-		elev_stop_motor(current_dir);
+	case S_AT_FLOOR:
+		// Make sure motorvis stopped, light stop button, open door and erase queue.
+		elev_stop_motor(motor_dir);
 		elev_set_stop_lamp(1);
 		elev_set_door_open_lamp(1);
-		set_queue();
+		queue_delete_queue();
 		el_state = S_STOPBUTTON_AT_FLOOR;
+
+	}
 }
 
 

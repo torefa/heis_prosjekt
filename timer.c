@@ -13,6 +13,6 @@ void timer_start(){
 }
 
 // Returns the status of the timer
-int time_out(){
+int timer_time_out(){
 	return timer_active;
 }

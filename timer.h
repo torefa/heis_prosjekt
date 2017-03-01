@@ -5,5 +5,5 @@
 void timer_start();
 
 // Funtion to notify that the time is out
-int time_out();
+int timer_time_out();
 
