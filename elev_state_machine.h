@@ -3,6 +3,8 @@
 
 #include "elev.h"
 
+void evInitialize(void);
+
 // Event button is pressed
 void evButtonPressed(elev_button_type_t button, int floor);
 
