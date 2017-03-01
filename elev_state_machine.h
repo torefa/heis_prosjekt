@@ -1,6 +1,8 @@
 // The state machine for the elevator
 #pragma once
 
+#include "elev.h"
+
 // Event button is pressed
 void evButtonPressed(elev_button_type_t button, int floor);
 
