@@ -42,7 +42,7 @@ void poll_buttons(){
 	for (floor = 0; floor < N_FLOORS; floor++){
 		for(button = 0; button < 3; button++){
 			if(elev_get_button_signal(button, floor)){
-				evBbutton_pressed(button, floor);
+				evButton_pressed(button, floor);
 			}
 		}
 	}
