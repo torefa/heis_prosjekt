@@ -5,12 +5,12 @@ static int down_queue[4] = {0};
 void queue_set_queue(int order, int pos){
 	
 	if(order == pos){
-		up_queue[order] == down_queue[order] = 1;
+		up_queue[order] = down_queue[order] = 1;
 	}
-	else if ((order > pos){
+	else if (order > pos){
 		up_queue[order] = 1;
 	}
-	else if ((order > pos){
+	else if (order > pos){
 		down_queue[order] = 1;
 	}
 	
