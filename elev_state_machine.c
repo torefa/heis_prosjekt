@@ -89,7 +89,7 @@ void evButton_pressed(elev_button_type_t button, int floor){
 			motor_dir = DIRN_UP;
 			el_state = S_MOVING;
 		
-		}else if (motor_dir < 0 && queue_get_queue(floor, current_dir)){
+		}else if (motor_dir < 0 && queue_get_queue(floor, motor_dir)){
 			elev_set_motor_direction(DIRN_DOWN);
 			motor_dir = DIRN_DOWN;
 			el_state = S_MOVING;
