@@ -57,6 +57,30 @@ void evFloor_reached(int floor){
 		//erase floor from queue.
 		queue_delete_floor(floor);
 	}	
+	
+	    // Change direction when we reach top/bottom floor
+    if (floor == N_FLOORS - 1) {
+        elev_set_motor_direction(DIRN_DOWN);
+		motor_dir = DIRN_DOWN;
+    }
+	else if (floor == 0) {
+        elev_set_motor_direction(DIRN_UP);
+		motor_dir = DIRN_UP;
+    }
+	
+	
+	
+/*	    // Change direction when we reach top/bottom floor
+    if (elev_get_floor_sensor_signal() == N_FLOORS - 1) {
+        elev_set_motor_direction(DIRN_DOWN);
+		motor_dir = DIRN_DOWN;
+    }
+	else if (elev_get_floor_sensor_signal() == 0) {
+        elev_set_motor_direction(DIRN_UP);
+		motor_dir = DIRN_UP;
+    }
+	*/
+	
 }
 
 

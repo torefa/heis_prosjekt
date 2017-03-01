@@ -17,21 +17,8 @@ int main() {
 		//poll_buttons();
 		//poll_sensors();
 		//poll_timer();
-		
-        // Change direction when we reach top/bottom floor
-        if (elev_get_floor_sensor_signal() == N_FLOORS - 1) {
-            elev_set_motor_direction(DIRN_DOWN);
-	//		motor_dir = DIRN_DOWN;
-        }
-		else if (elev_get_floor_sensor_signal() == 0) {
-            elev_set_motor_direction(DIRN_UP);
-	//		motor_dir = DIRN_UP;
-        }
+	}
 
-
-    }
-
-	
     return 0;
 }
 
@@ -39,6 +26,8 @@ int main() {
 void poll_buttons(){
 	int floor;
 	int button;
+	// bør kanskje vaære av denne typen?
+//	elev_button_type_t button;
 	for (floor = 0; floor < N_FLOORS; floor++){
 		for(button = 0; button < 3; button++){
 			if(elev_get_button_signal(button, floor)){
@@ -59,7 +48,7 @@ void poll_sensors(){
 
 void poll_timer(){
 	if(timer_time_out()){
-		evTime_out;
+		evTime_out();
 	}
 }
 
