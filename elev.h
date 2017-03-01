@@ -39,7 +39,7 @@ void elev_set_motor_direction(elev_motor_direction_t dirn);
 /**
 	Stops the motor accurately
 **/
-void elev_stop_motor(int current_dir);
+void elev_stop_motor(int motor_dir);
 
 /**
   Turn door-open lamp on or off.

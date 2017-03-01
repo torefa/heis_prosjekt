@@ -69,8 +69,8 @@ void elev_set_motor_direction(elev_motor_direction_t dirn) {
     }
 }
 
-void elev_stop_motor(int current_dir){
-	elev_set_motor_direction(- current_dir); 		
+void elev_stop_motor(int motor_dir){
+	elev_set_motor_direction(- motor_dir); 		
 	usleep(100); 													 
 	elev_set_motor_direction(0); 						
 }
