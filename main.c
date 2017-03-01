@@ -52,9 +52,8 @@ void poll_buttons(){
 }
 
 void poll_sensors(){
-	if((elev_get_floor_sensor_signal != -1) && (elev_get_floor_sensor_signal() != current_floor)){
-		current_floor = elev_get_floor_sensor_signal();
-		evFloor_reached(current_floor, motor_dir);
+	if((elev_get_floor_sensor_signal != -1)){
+		evFloor_reached(elev_get_floor_sensor_signal());
 	}
 }
 
