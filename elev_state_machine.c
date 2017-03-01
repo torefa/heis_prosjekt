@@ -20,6 +20,25 @@ static ELState el_state = S_IDLE;
 static int current_floor;
 static int motor_dir = DIRN_UP;
 
+
+void evInitialize(){
+	// Initialize hardware
+    if (!elev_init()) {
+        printf("Unable to initialize elevator hardware!\n");
+        return 1;
+    }
+	
+	//initialize elevator
+    elev_set_motor_direction(motor_dir);
+	while(1){
+		if(elev_get_floor_sensor_signal() != -1){
+			elev_stop_motor(motor_dir);
+			current_floor = elev_get_floor_sensor_signal();
+			break;
+		}
+	}
+}
+
 void evFloor_reached(int floor){
 	elev_set_floor_indicator(floor);
 	current_floor = floor;
