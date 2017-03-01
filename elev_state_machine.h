@@ -2,10 +2,10 @@
 #pragma once
 
 // Event button is pressed
-void evButtonPressed(void);
+void evButtonPressed(elev_button_type_t button, int floor);
 
 // Event floor is reached
-void evFloor_reached(void);
+void evFloor_reached(int floor);
 
 // Event timer has timed out
 void evTime_out(void);
