@@ -32,7 +32,7 @@ void evInitialize(){
     elev_set_motor_direction(motor_dir);
 	while(1){
 		if(elev_get_floor_sensor_signal() != -1){
-			elev_set_motor_direction(0);
+			elev_set_motor_direction(DIRN_STOP);
 			current_floor = elev_get_floor_sensor_signal();
 			break;
 		}
@@ -46,7 +46,7 @@ void evFloor_reached(int floor){
 	current_floor = floor;
 	
 	if (queue_check_floor(current_floor, motor_dir)){
-			elev_set_motor_direction(0);
+			elev_set_motor_direction(DIRN_STOP);
 			timer_start();
 			elev_set_door_open_lamp(1);
 		
@@ -142,7 +142,7 @@ void evStop_button_signal(int active){
 	if (active){
 		printf("evStop_button_signal\n");
 		// Stop motor, light stop button and erase queue.
-			elev_set_motor_direction(0);
+			elev_set_motor_direction(DIRN_STOP);
 			elev_set_stop_lamp(1);
 			queue_delete_queue();
 			elev_clear_all_button_lamps();
