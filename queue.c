@@ -54,4 +54,7 @@ int queue_check_floor(int floor, int motor_dir){
 	else if (motor_dir < 0){
 		return down_queue[floor];
 	}
+   else { // Should not happen, as motor_dir is either 1 or -1
+	   return -1;
+   }
 }
