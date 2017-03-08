@@ -30,7 +30,7 @@ void poll_buttons(){
 //	elev_button_type_t button;
 	for (floor = 0; floor < N_FLOORS; floor++){
 		for(button = 0; button < 3; button++){
-			if(elev_get_button_signal(button, floor)){
+			if(!floor == button && elev_get_button_signal(button, floor)){
 				evButton_pressed(button, floor);
 			}
 		}
