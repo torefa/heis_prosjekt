@@ -9,8 +9,6 @@
 // Number of floors
 #define N_FLOORS 4
 
-// Number of button types
-#define N_BUTTONS 3
 
 
 /**

@@ -26,5 +26,5 @@ int timer_time_out(){
 		time_out = 1;
 		time_read = 1;
 	}
-	return time_out;
+	return timer_active;
 }
