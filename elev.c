@@ -69,11 +69,6 @@ void elev_set_motor_direction(elev_motor_direction_t dirn) {
     }
 }
 
-void elev_stop_motor(int motor_dir){
-	elev_set_motor_direction(- motor_dir); 		
-	usleep(100); 													 
-	elev_set_motor_direction(0); 						
-}
 
 void elev_set_door_open_lamp(int value) {
     if (value)
@@ -153,10 +148,26 @@ void elev_set_button_lamp(elev_button_type_t button, int floor, int value) {
 }
 
 void elev_turn_off_button_lamp(int floor){
-	elev_set_button_lamp(BUTTON_CALL_DOWN, floor, 0);
-    elev_set_button_lamp(BUTTON_CALL_UP, floor, 0);
-	elev_set_button_lamp(BUTTON_COMMAND, floor, 0);
-
+	if(floor != 0){
+		elev_set_button_lamp(BUTTON_CALL_DOWN, floor, 0);
+	}
+	if(floor != 4-1){
+	    elev_set_button_lamp(BUTTON_CALL_UP, floor, 0);
+	}
+		elev_set_button_lamp(BUTTON_COMMAND, floor, 0);
+	
 }
 
+void elev_clear_all_button_lamps(){
+	int i;
+	 for (i = 0; i < N_FLOORS; ++i) {
+        if (i != 0)
+            elev_set_button_lamp(BUTTON_CALL_DOWN, i, 0);
+
+        if (i != N_FLOORS - 1)
+            elev_set_button_lamp(BUTTON_CALL_UP, i, 0);
+
+        elev_set_button_lamp(BUTTON_COMMAND, i, 0);
+    }
+}
 

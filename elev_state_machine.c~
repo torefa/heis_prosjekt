@@ -62,11 +62,11 @@ void evFloor_reached(int floor){
 	}	
 	
 	// Change direction when we reach top/bottom floor
-    if (floor == N_FLOORS - 1 ) {
+    if (floor == N_FLOORS - 1 && queue_check_floor(current_floor, motor_dir)) {
         elev_set_motor_direction(DIRN_DOWN);
 		motor_dir = DIRN_DOWN;
     }
-	else if (floor == 0) {
+	else if (floor == 0 && queue_check_floor(current_floor, motor_dir)) {
         elev_set_motor_direction(DIRN_UP);
 		motor_dir = DIRN_UP;
     }

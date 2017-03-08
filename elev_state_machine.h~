@@ -6,7 +6,7 @@
 void evInitialize(void);
 
 // Event button is pressed
-void evButton_pressed(elev_button_type_t button, int floor);
+void evButtonPressed(elev_button_type_t button, int floor);
 
 // Event floor is reached
 void evFloor_reached(int floor);

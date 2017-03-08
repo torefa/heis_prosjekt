@@ -2,7 +2,7 @@
 CC = clang-3.6
 
 # Compiler flags go here.
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -std=c11
 
 # Linker flags go here.
 LDFLAGS = -lcomedi -lm

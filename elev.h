@@ -38,10 +38,6 @@ typedef enum tag_elev_motor_direction {
 */
 void elev_set_motor_direction(elev_motor_direction_t dirn);
 
-/**
-	Stops the motor accurately
-**/
-void elev_stop_motor(int motor_dir);
 
 /**
   Turn door-open lamp on or off.
@@ -128,5 +124,10 @@ void elev_set_button_lamp(elev_button_type_t button, int floor, int value);
 	Turn off all button lamps when the elvator stops at a floor.
 -*/
 void elev_turn_off_button_lamp(int floor);
+
+/** 
+	Turn off all button lamps when stop button is pressed.
+-*/
+void elev_clear_all_button_lamps();
 
 #endif // #ifndef __INCLUDE_DRIVER_H__
