@@ -30,17 +30,17 @@ int main() {
 void poll_buttons(){
 	int floor;
 	int button;
-	// bør kanskje vaære av denne typen?
-//	elev_button_type_t button;
+
 	for (floor = 0; floor < N_FLOORS; floor++){ 
 		for(button = 0; button < N_BUTTONS; button++){
 			if(!(floor == 0 && button == BUTTON_CALL_DOWN) && !(floor == 3 && button == BUTTON_CALL_UP)){
 				if(elev_get_button_signal(button, floor) && button != lastButton){
 					printf("%d %d\n", floor, button);
 					evButton_pressed((elev_button_type_t)button, floor);
+					lastButton = button;
 				}
 				
-				lastButton = button;
+				
 			}
 		}
 	}

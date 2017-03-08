@@ -37,11 +37,11 @@ void evInitialize(){
 			break;
 		}
 	}
-	el_state = S_AT_FLOOR;	
+	el_state = S_AT_FLOOR;	//Trengs denne?
 }
 
 void evFloor_reached(int floor){
-	printf("evFloor_reached: %d\n, motor dir = %d\n",floor,motor_dir);
+	printf("evFloor_reached: %d\n, motor dir = %d\n", floor, motor_dir);
 	elev_set_floor_indicator(floor);
 	current_floor = floor;
 	
