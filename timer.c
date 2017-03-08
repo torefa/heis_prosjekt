@@ -3,11 +3,11 @@
 #include <time.h>
 
 // Indication of running timer
-static  int timer_active = 0;
+static  int time_out = 0;
 
 // 3 second timer
 void timer_start(){
-	timer_active = 1;
+	time_out = 0;
 	float start_time = clock();
 }
 
@@ -15,12 +15,10 @@ void timer_start(){
 int timer_time_out(){
 	float delta_time = (float)(clock() - start_time) / CLOCKS_PER_SEC;
 	if(delta_time < 3){
-		timer_active = 1;
+		time_out = 0;
 	}
 	else{
-		timer_active = 0:
+		time_out = 1:
 	}
 	return timer_active;
 }
-
-
