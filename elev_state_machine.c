@@ -32,21 +32,21 @@ void evInitialize(){
     elev_set_motor_direction(motor_dir);
 	while(1){
 		if(elev_get_floor_sensor_signal() != -1){
-			elev_set_motor_direction(DIRN_STOP);
+			elev_set_motor_direction(0);
 			current_floor = elev_get_floor_sensor_signal();
 			break;
 		}
 	}
-	el_state = S_AT_FLOOR;	//Trengs denne?
+	el_state = S_IDLE;	
 }
 
 void evFloor_reached(int floor){
-	printf("evFloor_reached: %d\n, motor dir = %d\n", floor, motor_dir);
+	printf("evFloor_reached: %d\n, motor dir = %d\n",floor,motor_dir);
 	elev_set_floor_indicator(floor);
 	current_floor = floor;
 	
 	if (queue_check_floor(current_floor, motor_dir)){
-			elev_set_motor_direction(DIRN_STOP);
+			elev_set_motor_direction(0);
 			timer_start();
 			elev_set_door_open_lamp(1);
 		
@@ -59,8 +59,14 @@ void evFloor_reached(int floor){
 			//erase floor from queue.
 			queue_delete_floor(current_floor);
 			
+			if(!queue_get_queue(floor, motor_dir) && !queue_get_queue(floor, -motor_dir)){
+				el_state = S_IDLE;
+			}
 	}	
 	
+	
+	
+/*	
 	// Change direction when we reach top/bottom floor
     if (floor == N_FLOORS - 1 ) {
         elev_set_motor_direction(DIRN_DOWN);
@@ -70,7 +76,7 @@ void evFloor_reached(int floor){
         elev_set_motor_direction(DIRN_UP);
 		motor_dir = DIRN_UP;
     }
-
+*/
 }
 
 
@@ -97,6 +103,17 @@ void evButton_pressed(elev_button_type_t button, int floor){
 	case S_STOPBUTTON:
 		break;
 	case S_IDLE:
+		if (floor - current_floor > 0){
+			elev_set_motor_direction(1);
+			if(button == BUTTON_CALL_DOWN){
+				motor_dir = DIRN_DOWN;
+			}
+		} else {
+			elev_set_motor_direction(-1);
+			if(button == BUTTON_CALL_UP){
+				motor_dir = DIRN_UP;
+			}
+		}
 		break;
 	case S_STOPBUTTON_AT_FLOOR:
 		break;
@@ -113,6 +130,7 @@ void evButton_pressed(elev_button_type_t button, int floor){
 			el_state = S_MOVING;
 			break;
 		}else {
+			el_state = S_IDLE;
 			break;
 		}
 		
@@ -142,7 +160,7 @@ void evStop_button_signal(int active){
 	if (active){
 		printf("evStop_button_signal\n");
 		// Stop motor, light stop button and erase queue.
-			elev_set_motor_direction(DIRN_STOP);
+			elev_set_motor_direction(0);
 			elev_set_stop_lamp(1);
 			queue_delete_queue();
 			elev_clear_all_button_lamps();
@@ -158,7 +176,3 @@ void evStop_button_signal(int active){
 	}
 	
 }
-
-
-
-
