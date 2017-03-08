@@ -1,4 +1,3 @@
-
 #include "queue.h"
 
 static int up_queue[4] = {0};
