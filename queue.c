@@ -53,12 +53,7 @@ int queue_check_floor(int floor, int motor_dir){
 		return up_queue[floor];
 	} else if (motor_dir < 0){
 		return down_queue[floor];
-<<<<<<< HEAD
+
 	}
 	return 0;
-=======
-	} else { // Should not happen, as motor_dir is either 1 or -1
-	   return -1;
-   }
->>>>>>> 85a811864fd9e0c333fad8f252e1f23f4ef74e9a
 }
