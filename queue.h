@@ -28,7 +28,7 @@ void queue_delete_queue(void);
 
 /*
 	Checks all floors orders in the direction the elevator is/was moving, and returns true if there is a floor order in the given direction.
-	If none of the floors in the given direction are orderd, the function returns -1.
+	If none of the floors in the given direction are orderd, the function returns false.
 */
 int queue_get_queue(int floor, int motor_dir);
 
