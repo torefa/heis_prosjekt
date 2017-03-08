@@ -11,7 +11,7 @@ void queue_set_queue(int order, int pos){
 		up_queue[order] = down_queue[order] = 1;
 	} else if (order > pos){
 		up_queue[order] = 1;
-	} else if (order > pos){
+	} else if (order < pos){
 		down_queue[order] = 1;
 	}
 	
@@ -39,7 +39,7 @@ void queue_delete_queue(void){
 int queue_get_queue(int floor, int motor_dir){
 	int i;
 	for (i = floor; (i > -1) && (i < 4); i = i + motor_dir){
-		printf("i = %d", i);
+		printf("i = %d\n", i);
 		if(queue_check_floor(i, motor_dir) == 1){
 			return 1;
 			break;
