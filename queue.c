@@ -3,8 +3,8 @@
 static int up_queue[4] = {0};
 static int down_queue[4] = {0};
 
+
 void queue_set_queue(int order, int pos){
-	
 	if(order == pos){
 		up_queue[order] = down_queue[order] = 1;
 	}
