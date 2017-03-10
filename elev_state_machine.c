@@ -8,6 +8,8 @@
 #include "timer.h"
 #include "queue.h"
 
+static void drive(int current_floor, int motor_dir);
+
 typedef enum {
 		S_IDLE,
 		S_MOVING,
@@ -20,6 +22,7 @@ static ELState el_state = S_IDLE;
 
 static int current_floor;
 static int motor_dir = DIRN_UP;
+
 
 
 void evInitialize(){
@@ -86,6 +89,7 @@ void evButton_pressed(elev_button_type_t button, int floor){
 	printf("evButton_pressed\n");
 	
 	//Check button type and set the relevant lamp.
+	//Trengs egentlig if-statementen? BLir jo sjekket før funksjonskallet. Og for-løkka tillater ikke floor = -1
 	if(floor != -1 && !(floor == 0 && button == BUTTON_CALL_DOWN) && !(floor == 3 && button == BUTTON_CALL_UP)){
 		elev_set_button_lamp(button, floor, 1);
 	}
@@ -94,10 +98,10 @@ void evButton_pressed(elev_button_type_t button, int floor){
 	//Check button type and set the relevant queue.
 	if (button == BUTTON_CALL_UP && floor != 3){
 		queue_set_up_queue(floor);
-		printf("Satt opp queue!\n");
+		printf("Satt opp-queue!\n");
 	} else if (button == BUTTON_CALL_DOWN && floor != 0){
 		queue_set_down_queue(floor);
-		printf("Satt ned queue!\n");		
+		printf("Satt ned-queue!\n");		
 	} else if (button == BUTTON_COMMAND){		
 		queue_set_queue(floor, current_floor);
 		printf("Satt begge queues!\n");
@@ -190,7 +194,7 @@ void evTime_out(){
 //Event for activated stop button
 void evStop_button_signal(int signal){
 	printf("evStop_button_signal: \n", signal);
-		if (signal == 1)}
+		if (signal == 1){
 		// Stop motor, light stop button and erase queue.
 			elev_set_motor_direction(DIRN_STOP);
 			elev_set_stop_lamp(1);
@@ -199,11 +203,28 @@ void evStop_button_signal(int signal){
 			if (el_state == S_AT_FLOOR){
 				elev_set_door_open_lamp(1);
 				el_state = S_STOPBUTTON_AT_FLOOR;
-			}else {		
+			} else{		
 					el_state = S_STOPBUTTON;
 			}
-	} else {
+	} else{
 		elev_set_stop_lamp(0);
+		elev_set_door_open_lamp(0);
 	}
-
 }
+
+static void drive(int current_floor, int motor_dir){
+	if (queue_get_queue(current_floor, motor_dir)){
+			elev_set_motor_direction(motor_dir);			
+			el_state = S_MOVING;
+			
+	} else if (queue_get_queue(current_floor, -motor_dir)){
+			motor_dir = -motor_dir;
+			elev_set_motor_direction(motor_dir);
+			el_state = S_MOVING;
+			
+	} else{
+		el_state = S_IDLE
+	}
+}
+
+
