@@ -188,18 +188,22 @@ void evTime_out(){
 
 
 //Event for activated stop button
-void evStop_button_signal(){
-	printf("evStop_button_signal\n");
-	// Stop motor, light stop button and erase queue.
-		elev_set_motor_direction(DIRN_STOP);
-		elev_set_stop_lamp(1);
-		queue_delete_queue();
-		elev_clear_all_button_lamps();
-		if (el_state == S_AT_FLOOR){
-			elev_set_door_open_lamp(1);
-			el_state = S_STOPBUTTON_AT_FLOOR;
-		}else {		
-			el_state = S_STOPBUTTON;
-		}		
+void evStop_button_signal(int signal){
+	printf("evStop_button_signal: \n", signal);
+		if (signal == 1)}
+		// Stop motor, light stop button and erase queue.
+			elev_set_motor_direction(DIRN_STOP);
+			elev_set_stop_lamp(1);
+			queue_delete_queue();
+			elev_clear_all_button_lamps();
+			if (el_state == S_AT_FLOOR){
+				elev_set_door_open_lamp(1);
+				el_state = S_STOPBUTTON_AT_FLOOR;
+			}else {		
+					el_state = S_STOPBUTTON;
+			}
+	} else {
+		elev_set_stop_lamp(0);
+	}
 
 }

@@ -15,4 +15,4 @@ void evFloor_reached(int floor);
 void evTime_out(void);
 
 // Event Stop button is pressed
-void evStop_button_signal(void);
+void evStop_button_signal(int signal);
