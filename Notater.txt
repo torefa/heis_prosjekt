@@ -1,0 +1,16 @@
+Endringslogg:
+	- Har lagd en egen drive-fc for å minimere kode
+	- Har lagd utgang fra evStopp(...) til å endre state
+	- Lager en egen state S_TIMEOUT for å hindre at heisen kjører videre før timeren er ute
+		- Nå kan man kun kjøre videre fra evButton_pressed hvis el_state er S_IDLE eller S_TIMEOUT
+		- Men evTimeout kjører selv videre. Så ^ treger egentlig bare å kjøre videre hvis el_state == S_IDLE
+	- Har gjort det sånn at evStopp(...) alltid går inn i el_state S_IDLE.
+	- I evButton_pressed: Hvis floor == current_floor, åpner heisen døra og starter timer
+	
+	
+Tanker:
+	- Burde evEvent bytte navn? For kontinuitet
+	- Trengs S_ forran states? Er det kanskje selvforklarende?
+	- Tregs egentlig S_STOP_BUTTON_AT_FLOOR? Det er bare for å åpne døra, og det kan egentlig gjøres bare ved å sjekke el_state
+	- Trenger man å sjekke om køen er tom i evFloor_reached?
+	- Vi bruker mye logikk. Skal vi lage en bool enum med true og false?

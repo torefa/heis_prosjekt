@@ -15,7 +15,8 @@ typedef enum {
 		S_MOVING,
 		S_AT_FLOOR,
 		S_STOPBUTTON,
-		S_STOPBUTTON_AT_FLOOR
+		S_STOPBUTTON_AT_FLOOR,
+		S_TIMEOUT
 } ELState;
 
 static ELState el_state = S_IDLE;
@@ -64,7 +65,7 @@ void evFloor_reached(int floor){
 			//erase floor from queue.
 			queue_delete_floor(current_floor);
 			
-			if(!queue_get_queue(floor, motor_dir) && !queue_get_queue(floor, -motor_dir)){
+			if(!queue_get_queue(floor, motor_dir) && !queue_get_queue(floor, -motor_dir)){ //Trengs denne?
 				el_state = S_IDLE;
 			}
 	}	
@@ -96,10 +97,10 @@ void evButton_pressed(elev_button_type_t button, int floor){
 	
 	
 	//Check button type and set the relevant queue.
-	if (button == BUTTON_CALL_UP && floor != 3){
+	if (button == BUTTON_CALL_UP && floor != 3){	//Kan fc ta inn dette?
 		queue_set_up_queue(floor);
 		printf("Satt opp-queue!\n");
-	} else if (button == BUTTON_CALL_DOWN && floor != 0){
+	} else if (button == BUTTON_CALL_DOWN && floor != 0){ //Kan fc ta inn dette?
 		queue_set_down_queue(floor);
 		printf("Satt ned-queue!\n");		
 	} else if (button == BUTTON_COMMAND){		
@@ -108,22 +109,7 @@ void evButton_pressed(elev_button_type_t button, int floor){
 	}
 	
 	//Start elevator in direction of button order if not already moving.
-	switch(el_state){
-	case S_STOPBUTTON:
-			if (queue_get_queue(floor, motor_dir)){
-			elev_set_motor_direction(motor_dir);			
-			el_state = S_MOVING;
-			break;
-		}else if (queue_get_queue(floor, -motor_dir)){
-			motor_dir = -motor_dir;
-			elev_set_motor_direction(motor_dir);
-			el_state = S_MOVING;
-			break;
-		}else {
-			el_state = S_IDLE;
-			break;
-		}
-		
+	switch(el_state){		
 	case S_IDLE:
 		printf("CASE: IDLE\n");
 		if (floor - current_floor > 0){
@@ -131,63 +117,42 @@ void evButton_pressed(elev_button_type_t button, int floor){
 			elev_set_motor_direction(DIRN_UP);
 				motor_dir = DIRN_UP;
 
-		} else {
+		} else if (floor - current_floor < 0){
 		printf("Ned\n");
 			elev_set_motor_direction(DIRN_DOWN);
 				motor_dir = DIRN_DOWN;
+		} else{
+			timer_start();
+			printf("HA!\n");
+			elev_set_door_open_lamp(1);
+			printf("Nei?\n");
+		
+			//Turn off button lamps for the floor
+			elev_turn_off_button_lamp(current_floor);
+			
+			//Set state
+			el_state = S_AT_FLOOR;
+		
+			//erase floor from queue.
+			queue_delete_floor(current_floor);
 		}
 		break;
 		
-	case S_STOPBUTTON_AT_FLOOR:
-		if (queue_get_queue(floor, motor_dir)){
-			elev_set_motor_direction(motor_dir);			
-			el_state = S_MOVING;
-			break;
-		}else if (queue_get_queue(floor, -motor_dir)){
-			motor_dir = -motor_dir;
-			elev_set_motor_direction(motor_dir);
-			el_state = S_MOVING;
-			break;
-		}else {
-			el_state = S_IDLE;
-			break;
-		}
-	case S_MOVING:
-		break;
+	case S_TIMEOUT:
+		drive(current_floor, motor_dir);
 		
 	default:
-		if (queue_get_queue(floor, motor_dir)){
-			elev_set_motor_direction(motor_dir);			
-			el_state = S_MOVING;
-			break;
-		}else if (queue_get_queue(floor, -motor_dir)){
-			motor_dir = -motor_dir;
-			elev_set_motor_direction(motor_dir);
-			el_state = S_MOVING;
-			break;
-		}else {
-			el_state = S_IDLE;
-			break;
-		}
-		
+		break;
 	}
 }
 
 
 //When time is out, close door and start elevator if there is any orders.
 void evTime_out(){
+	el_state = S_TIMEOUT;
 	printf("evTime_out\n");
 	elev_set_door_open_lamp(0);
-	if (queue_get_queue(current_floor, motor_dir)){
-			elev_set_motor_direction(motor_dir);			
-			el_state = S_MOVING;
-			
-	}else if (queue_get_queue(current_floor, -motor_dir)){
-			motor_dir = -motor_dir;
-			elev_set_motor_direction(motor_dir);
-			el_state = S_MOVING;
-			
-	}
+	drive(current_floor, motor_dir);
 }
 
 
@@ -208,7 +173,15 @@ void evStop_button_signal(int signal){
 			}
 	} else{
 		elev_set_stop_lamp(0);
-		elev_set_door_open_lamp(0);
+		
+		if(el_state == S_STOPBUTTON_AT_FLOOR){
+			el_state = S_IDLE;
+			elev_set_door_open_lamp(0);
+			
+		} else if(el_state == S_STOPBUTTON){
+			el_state = S_IDLE;
+		}
+		
 	}
 }
 
