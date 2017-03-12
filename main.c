@@ -12,11 +12,14 @@ void poll_timer();
 static int last_floor = 10;		// Initialized to not conflict with actual floors
 static int last_button = 10;	// Initialized to not conflict with actual buttons
 
+static int FALSE = 0;
+static int TRUE = 1;
+
 int main() {
       // Initialize hardware
 	evInitialize();
 	
-    while (1) {
+    while (TRUE){
 		
 		poll_buttons();
 		poll_stop_button();
@@ -25,7 +28,7 @@ int main() {
 		
 	}
 
-    return 0;
+    return FALSE;
 }
 
 
@@ -35,7 +38,7 @@ void poll_buttons(){
 
 	for (floor = 0; floor < N_FLOORS; floor++){ 
 		for(button = 0; button < N_BUTTONS; button++){
-			if(!(floor == 0 && button == BUTTON_CALL_DOWN) && !(floor == 3 && button == BUTTON_CALL_UP)){
+			if(!(floor == FIRST && button == BUTTON_CALL_DOWN) && !(floor == FOURTH && button == BUTTON_CALL_UP)){
 				if(elev_get_button_signal(button, floor) && (button != lastButton && floor != lastFloor)){
 					printf("%d %d\n", floor, button);								
 					evButton_pressed((elev_button_type_t)button, floor);
@@ -49,17 +52,17 @@ void poll_buttons(){
 
 void poll_stop_button(){
 		if(elev_get_stop_signal() && lastButton != -1){
-		evStop_button_signal(1);
+		evStop_button_signal(TRUE);
 		lastButton = -1; // -1 is not used for other functionality
 		} else if(!elev_get_stop_signal() && lastButton == -1){
-		evStop_button_signal(0);
+		evStop_button_signal(FALSE);
 		}
 }
 
 void poll_sensors(){
 	
 	int floor = elev_get_floor_sensor_signal();
-	if(floor >= 0 && floor < N_FLOORS && floor != lastFloor){
+	if(floor >= FIRST && floor < N_FLOORS && floor != lastFloor){
 		evFloor_reached(floor);
 	}
 	lastFloor = floor;

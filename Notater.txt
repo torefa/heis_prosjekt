@@ -7,7 +7,8 @@ Endringslogg:
 	- Har gjort det sånn at evStopp(...) alltid går inn i el_state S_IDLE.
 	- I evButton_pressed: Hvis floor == current_floor, åpner heisen døra og starter timer
 	- Flyttet includes til .h
-	- Har laget FALSE = 0 og TRUE = 1 i FSM og timer, OFF = 0 og ON = 1 for lamper i FSM, og NO_ORDER = 0 og ORDER = 1 i queue.
+	- Har laget FALSE = 0 og TRUE = 1 i FSM, main og timer, OFF = 0 og ON = 1 for lamper i FSM, og NO_ORDER = 0 og ORDER = 1 i queue.
+	- Fiksa også en enum el_floor i FSM
 	
 	
 Tanker:

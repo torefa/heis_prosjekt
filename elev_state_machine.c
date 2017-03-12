@@ -13,8 +13,6 @@ typedef enum {
 		S_TIMEOUT
 } ELState;
 
-
-
 static ELState el_state = S_IDLE;
 
 static int current_floor;
@@ -94,16 +92,16 @@ void evButton_pressed(elev_button_type_t button, int floor){
 	
 	//Check button type and set the relevant lamp.
 	//Trengs egentlig if-statementen? BLir jo sjekket før funksjonskallet. Og for-løkka tillater ikke floor = -1
-	if(floor != -1 && !(floor == 0 && button == BUTTON_CALL_DOWN) && !(floor == 3 && button == BUTTON_CALL_UP)){
+	if(floor != -1 && !(floor == FIRST && button == BUTTON_CALL_DOWN) && !(floor == FOURTH	&& button == BUTTON_CALL_UP)){
 		elev_set_button_lamp(button, floor, ON);
 	}
 	
 	
 	//Check button type and set the relevant queue.
-	if (button == BUTTON_CALL_UP && floor != 3){	//Kan fc ta inn dette?
+	if (button == BUTTON_CALL_UP && floor != FOURTH){	//Kan fc ta inn dette?
 		queue_set_up_queue(floor);
 		printf("Satt opp-queue!\n");
-	} else if (button == BUTTON_CALL_DOWN && floor != 0){ //Kan fc ta inn dette?
+	} else if (button == BUTTON_CALL_DOWN && floor != FIRST){ //Kan fc ta inn dette?
 		queue_set_down_queue(floor);
 		printf("Satt ned-queue!\n");		
 	} else if (button == BUTTON_COMMAND){		

@@ -7,6 +7,12 @@
 #include "timer.h"
 #include "queue.h"
 
+typedef enum {
+	FIRST,
+	SECOND,
+	THIRD,
+	FOURTH
+} el_floor;
 
 void evInitialize(void);
 
