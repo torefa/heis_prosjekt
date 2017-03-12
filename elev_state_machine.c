@@ -18,9 +18,6 @@ static ELState el_state = S_IDLE;
 static int current_floor;
 static int motor_dir = DIRN_UP;
 
-static int FALSE = 0;
-static int TRUE = 1;
-
 static int OFF = 0;
 static int ON = 1;
 
@@ -51,39 +48,25 @@ void evFloor_reached(int floor){
 	current_floor = floor;
 	printf("Er det en bestilling her? %d\n", queue_check_floor(current_floor, motor_dir));
 	if (queue_check_floor(current_floor, motor_dir) == TRUE){
-			elev_set_motor_direction(DIRN_STOP);
-			timer_start();
-			printf("HA!\n");
-			elev_set_door_open_lamp(ON);
-			printf("Nei?\n");
+		elev_set_motor_direction(DIRN_STOP);
+		timer_start();
+		printf("HA!\n");
+		elev_set_door_open_lamp(ON);
+		printf("Nei?\n");
 		
-			//Turn off button lamps for the floor
-			elev_turn_off_button_lamp(current_floor);
+		//Turn off button lamps for the floor
+		elev_turn_off_button_lamp(current_floor);
 			
-			//Set state
-			el_state = S_AT_FLOOR;
+		//Set state
+		el_state = S_AT_FLOOR;
 		
-			//erase floor from queue.
-			queue_delete_floor(current_floor);
+		//erase floor from queue.
+		queue_delete_floor(current_floor);
 			
-			if(!queue_get_queue(floor, motor_dir) && !queue_get_queue(floor, -motor_dir)){ 	//Trengs denne?
-				el_state = S_IDLE;															//Men hvis vi skal ha den, burde vi ha true og false
-			}
+		if(!queue_get_queue(floor, motor_dir) && !queue_get_queue(floor, -motor_dir)){ 	//Trengs denne?
+			el_state = S_IDLE;															//Men hvis vi skal ha den, burde vi ha true og false
+		}
 	}	
-	
-	
-	
-/*	
-	// Change direction when we reach top/bottom floor
-    if (floor == N_FLOORS - 1 ) {
-        elev_set_motor_direction(DIRN_DOWN);
-		motor_dir = DIRN_DOWN;
-    }
-	else if (floor == 0) {
-        elev_set_motor_direction(DIRN_UP);
-		motor_dir = DIRN_UP;
-    }
-*/
 }
 
 

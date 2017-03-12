@@ -9,10 +9,12 @@ Endringslogg:
 	- Flyttet includes til .h
 	- Har laget FALSE = 0 og TRUE = 1 i FSM, main og timer, OFF = 0 og ON = 1 for lamper i FSM, og NO_ORDER = 0 og ORDER = 1 i queue.
 	- Fiksa også en enum el_floor i FSM
-	
+	- Har lagt #includes i .h-filer, og byttet pragma once med #ifndef xxx og #define xxx. Har hørt at det er bedre.
+	- La over enum for motor_direction og buttons i definitions.h
 	
 Tanker:
 	- Burde evEvent bytte navn? For kontinuitet
 	- Trengs S_ forran states? Er det kanskje selvforklarende?
 	- Tregs egentlig S_STOP_BUTTON_AT_FLOOR? Det er bare for å åpne døra, og det kan egentlig gjøres bare ved å sjekke el_state
 	- Trenger man å sjekke om køen er tom i evFloor_reached?
+	- Må elev.c og io.c også ha god lesbarhet??

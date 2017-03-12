@@ -1,4 +1,8 @@
 // Header for the queue file
+#ifndef queue
+#define queue
+
+#include "definitions.h"
 
 /* 
 	Adds floor order to up or down queue based on elevators relative position
@@ -35,3 +39,5 @@ int queue_check_floor(int floor, int motor_dir);
 	If none of the floors in the given direction are orderd, the function returns false.
 */
 int queue_get_queue(int floor, int motor_dir);
+
+#endif

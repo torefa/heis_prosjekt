@@ -3,6 +3,7 @@
 #include "timer.h"
 #include "elev_state_machine.h"
 #include "queue.h"
+#include "definitions.h"
 
 void poll_buttons();
 void poll_stop_button();
@@ -11,9 +12,6 @@ void poll_timer();
 
 static int last_floor = 10;		// Initialized to not conflict with actual floors
 static int last_button = 10;	// Initialized to not conflict with actual buttons
-
-static int FALSE = 0;
-static int TRUE = 1;
 
 int main() {
       // Initialize hardware

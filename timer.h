@@ -5,6 +5,8 @@
 #include <time.h>
 #include <stdio.h>
 
+#include "definitions.h"
+
 // Function to start the timer.
 void timer_start();
 

@@ -5,8 +5,8 @@
 static int NO_ORDER = 0;
 static int ORDER = 1;
 
-static int up_queue[4] = {NO_ORDER};
-static int down_queue[4] = {NO_ORDER};
+static int up_queue[N_FLOORS] = {NO_ORDER};
+static int down_queue[N_FLOORS] = {NO_ORDER};
 
 
 void queue_set_queue(int order, int pos){
@@ -34,15 +34,15 @@ void queue_delete_floor(int floor){
 
 void queue_delete_queue(void){
 	int i;
-	for (i = 0; i < 4; i++){
+	for (i = FIRST; i < N_FLOORS; i++){
 		queue_delete_floor(i);
 	}
 }
 
 int queue_check_floor(int floor, int motor_dir){
-	if (motor_dir > 0){
+	if (motor_dir == DIRN_DOWN){
 		return up_queue[floor];
-	} else if (motor_dir < 0){
+	} else if (motor_dir == DIRN_UP){
 		return down_queue[floor];
 
 	}
@@ -51,7 +51,7 @@ int queue_check_floor(int floor, int motor_dir){
 
 int queue_get_queue(int floor, int motor_dir){
 	int i;
-	for (i = floor; (i > -1) && (i < 4); i = i + motor_dir){	//Checks all floors in direction elevator is moving for orders
+	for (i = floor; (i > -1) && (i < N_FLOORS); i = i + motor_dir){	//Checks all floors in direction elevator is moving for orders
 		printf("i = %d\n", i);
 		if(queue_check_floor(i, motor_dir) == ORDER){
 			return ORDER;

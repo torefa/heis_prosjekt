@@ -1,9 +1,5 @@
 #include "timer.h"
 
-
-static int FALSE = 0;
-static int TRUE = 1;
-
 // Variable to indicate if the timer has been read or not
 // Exists to not trig event evTimeout for each poll
 static int time_out = TRUE;
