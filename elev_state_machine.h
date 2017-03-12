@@ -1,7 +1,12 @@
 // The state machine for the elevator
-#pragma once
+#ifndef elev_state_machine
+#define elev_state_machine
 
+#include <stdio.h>
 #include "elev.h"
+#include "timer.h"
+#include "queue.h"
+
 
 void evInitialize(void);
 
@@ -16,3 +21,5 @@ void evTime_out(void);
 
 // Event Stop button is pressed
 void evStop_button_signal(int signal);
+
+#endif
