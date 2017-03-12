@@ -1,208 +1,173 @@
-// The elevator stat machine
+// Wrapper for libComedi Elevator control.
+// These functions provides an interface to the elevators in the real time lab
+//
+// 2007, Martin Korsgaard
 
-#include "elev_state_machine.h"
 
-#include <stdio.h>
-
+#include "channels.h"
 #include "elev.h"
-#include "timer.h"
-#include "queue.h"
+#include "io.h"
 
-typedef enum {
-		S_IDLE,
-		S_MOVING,
-		S_AT_FLOOR,
-		S_STOPBUTTON,
-		S_STOPBUTTON_AT_FLOOR
-} ELState;
+#include <assert.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-static ELState el_state = S_IDLE;
-
-static int current_floor;
-static int motor_dir = DIRN_UP;
+// Number of signals and lamps on a per-floor basis (excl sensor)
 
 
-void evInitialize(){
-	// Initialize hardware
-    if (!elev_init()) {
-        printf("Unable to initialize elevator hardware!\n");
+static const int lamp_channel_matrix[N_FLOORS][N_BUTTONS] = {
+    {LIGHT_UP1, LIGHT_DOWN1, LIGHT_COMMAND1},
+    {LIGHT_UP2, LIGHT_DOWN2, LIGHT_COMMAND2},
+    {LIGHT_UP3, LIGHT_DOWN3, LIGHT_COMMAND3},
+    {LIGHT_UP4, LIGHT_DOWN4, LIGHT_COMMAND4},
+};
+
+
+static const int button_channel_matrix[N_FLOORS][N_BUTTONS] = {
+    {BUTTON_UP1, BUTTON_DOWN1, BUTTON_COMMAND1},
+    {BUTTON_UP2, BUTTON_DOWN2, BUTTON_COMMAND2},
+    {BUTTON_UP3, BUTTON_DOWN3, BUTTON_COMMAND3},
+    {BUTTON_UP4, BUTTON_DOWN4, BUTTON_COMMAND4},
+};
+
+int elev_init(void) {
+    int i;
+
+    // Init hardware
+    if (!io_init())
+        return 0;
+
+    // Zero all floor button lamps
+    for (i = 0; i < N_FLOORS; ++i) {
+        if (i != 0)
+            elev_set_button_lamp(BUTTON_CALL_DOWN, i, 0);
+
+        if (i != N_FLOORS - 1)
+            elev_set_button_lamp(BUTTON_CALL_UP, i, 0);
+
+        elev_set_button_lamp(BUTTON_COMMAND, i, 0);
     }
-	
-	//initialize elevator
-    elev_set_motor_direction(motor_dir);
-	while(1){
-		if(elev_get_floor_sensor_signal() != -1){
-			elev_set_motor_direction(DIRN_STOP);
-			current_floor = elev_get_floor_sensor_signal();
-			break;
-		}
-	}
-	el_state = S_IDLE;	
+
+    // Clear stop lamp, door open lamp, and set floor indicator to ground floor.
+    elev_set_stop_lamp(0);
+    elev_set_door_open_lamp(0);
+    elev_set_floor_indicator(0);
+
+    // Return success.
+    return 1;
 }
 
-void evFloor_reached(int floor){
-	printf("evFloor_reached: %d, motor dir = %d\n",floor,motor_dir);
-	elev_set_floor_indicator(floor);
-	current_floor = floor;
-	printf("Er det en bestilling her? %d\n", queue_check_floor(current_floor, motor_dir));
-	if (queue_check_floor(current_floor, motor_dir)){
-			elev_set_motor_direction(DIRN_STOP);
-			timer_start();
-			printf("HA!\n");
-			elev_set_door_open_lamp(1);
-			printf("Nei?\n");
-		
-			//Turn off button lamps for the floor
-			elev_turn_off_button_lamp(current_floor);
-			
-			//Set state
-			el_state = S_AT_FLOOR;
-		
-			//erase floor from queue.
-			queue_delete_floor(current_floor);
-			
-			if(!queue_get_queue(floor, motor_dir) && !queue_get_queue(floor, -motor_dir)){
-				el_state = S_IDLE;
-			}
-	}	
-	
-	
-	
-/*	
-	// Change direction when we reach top/bottom floor
-    if (floor == N_FLOORS - 1 ) {
-        elev_set_motor_direction(DIRN_DOWN);
-		motor_dir = DIRN_DOWN;
+void elev_set_motor_direction(elev_motor_direction_t dirn) {
+    if (dirn == 0){
+        io_write_analog(MOTOR, 0);
+    } else if (dirn > 0) {
+        io_clear_bit(MOTORDIR);
+        io_write_analog(MOTOR, 2800);
+    } else if (dirn < 0) {
+        io_set_bit(MOTORDIR);
+        io_write_analog(MOTOR, 2800);
     }
-	else if (floor == 0) {
-        elev_set_motor_direction(DIRN_UP);
-		motor_dir = DIRN_UP;
+}
+
+
+void elev_set_door_open_lamp(int value) {
+    if (value)
+        io_set_bit(LIGHT_DOOR_OPEN);
+    else
+        io_clear_bit(LIGHT_DOOR_OPEN);
+}
+
+int elev_get_obstruction_signal(void) {
+    return io_read_bit(OBSTRUCTION);
+}
+
+int elev_get_stop_signal(void) {
+    return io_read_bit(STOP);
+}
+
+void elev_set_stop_lamp(int value) {
+    if (value)
+        io_set_bit(LIGHT_STOP);
+    else
+        io_clear_bit(LIGHT_STOP);
+}
+
+int elev_get_floor_sensor_signal(void) {
+    if (io_read_bit(SENSOR_FLOOR1))
+        return 0;
+    else if (io_read_bit(SENSOR_FLOOR2))
+        return 1;
+    else if (io_read_bit(SENSOR_FLOOR3))
+        return 2;
+    else if (io_read_bit(SENSOR_FLOOR4))
+        return 3;
+    else
+        return -1;
+}
+
+void elev_set_floor_indicator(int floor) {
+    assert(floor >= 0);
+    assert(floor < N_FLOORS);
+
+    // Binary encoding. One light must always be on.
+    if (floor & 0x02)
+        io_set_bit(LIGHT_FLOOR_IND1);
+    else
+        io_clear_bit(LIGHT_FLOOR_IND1);
+
+    if (floor & 0x01)
+        io_set_bit(LIGHT_FLOOR_IND2);
+    else
+        io_clear_bit(LIGHT_FLOOR_IND2);
+}
+
+int elev_get_button_signal(elev_button_type_t button, int floor) {
+    assert(floor >= 0);
+    assert(floor < N_FLOORS);
+    assert(!(button == BUTTON_CALL_UP && floor == N_FLOORS - 1));
+    assert(!(button == BUTTON_CALL_DOWN && floor == 0));
+    assert(button == BUTTON_CALL_UP || button == BUTTON_CALL_DOWN || button == BUTTON_COMMAND);
+
+    if (io_read_bit(button_channel_matrix[floor][button]))
+        return 1;
+    else
+        return 0;
+}
+
+void elev_set_button_lamp(elev_button_type_t button, int floor, int value) {
+    assert(floor >= 0);
+    assert(floor < N_FLOORS);
+    assert(!(button == BUTTON_CALL_UP && floor == N_FLOORS - 1));
+    assert(!(button == BUTTON_CALL_DOWN && floor == 0));
+    assert(button == BUTTON_CALL_UP || button == BUTTON_CALL_DOWN || button == BUTTON_COMMAND);
+
+    if (value)
+        io_set_bit(lamp_channel_matrix[floor][button]);
+    else
+        io_clear_bit(lamp_channel_matrix[floor][button]);
+}
+
+void elev_turn_off_button_lamp(int floor){
+	if(floor != 0){
+		elev_set_button_lamp(BUTTON_CALL_DOWN, floor, 0);
+	}
+	if(floor != 4-1){
+	    elev_set_button_lamp(BUTTON_CALL_UP, floor, 0);
+	}
+		elev_set_button_lamp(BUTTON_COMMAND, floor, 0);
+	
+}
+
+void elev_clear_all_button_lamps(){
+	int i;
+	 for (i = 0; i < N_FLOORS; ++i) {
+        if (i != 0)
+            elev_set_button_lamp(BUTTON_CALL_DOWN, i, 0);
+
+        if (i != N_FLOORS - 1)
+            elev_set_button_lamp(BUTTON_CALL_UP, i, 0);
+
+        elev_set_button_lamp(BUTTON_COMMAND, i, 0);
     }
-*/
 }
-
-
-void evButton_pressed(elev_button_type_t button, int floor){
-	printf("evButton_pressed\n");
-	
-	//Check button type and set the relevant lamp.
-	if(floor != -1 && !(floor == 0 && button == BUTTON_CALL_DOWN) && !(floor == 3 && button == BUTTON_CALL_UP)){
-		elev_set_button_lamp(button, floor, 1);
-	}
-	
-	
-	//Check button type and set the relevant queue.
-	if (button == BUTTON_CALL_UP && floor != 3){
-		queue_set_up_queue(floor);
-		printf("Satt opp queue!\n");
-	} else if (button == BUTTON_CALL_DOWN && floor != 0){
-		queue_set_down_queue(floor);
-		printf("Satt ned queue!\n");		
-	} else if (button == BUTTON_COMMAND){		
-		queue_set_queue(floor, current_floor);
-		printf("Satt begge queues!\n");
-	}
-	
-	//Start elevator in direction of button order if not already moving.
-	switch(el_state){
-	case S_STOPBUTTON:
-			if (queue_get_queue(floor, motor_dir)){
-			elev_set_motor_direction(motor_dir);			
-			el_state = S_MOVING;
-			break;
-		}else if (queue_get_queue(floor, -motor_dir)){
-			motor_dir = -motor_dir;
-			elev_set_motor_direction(motor_dir);
-			el_state = S_MOVING;
-			break;
-		}else {
-			el_state = S_IDLE;
-			break;
-		}
-		
-	case S_IDLE:
-		printf("CASE: IDLE\n");
-		if (floor - current_floor > 0){
-		printf("Opp\n");
-			elev_set_motor_direction(DIRN_UP);
-				motor_dir = DIRN_UP;
-
-		} else {
-		printf("Ned\n");
-			elev_set_motor_direction(DIRN_DOWN);
-				motor_dir = DIRN_DOWN;
-		}
-		break;
-		
-	case S_STOPBUTTON_AT_FLOOR:
-		if (queue_get_queue(floor, motor_dir)){
-			elev_set_motor_direction(motor_dir);			
-			el_state = S_MOVING;
-			break;
-		}else if (queue_get_queue(floor, -motor_dir)){
-			motor_dir = -motor_dir;
-			elev_set_motor_direction(motor_dir);
-			el_state = S_MOVING;
-			break;
-		}else {
-			el_state = S_IDLE;
-			break;
-		}
-	case S_MOVING:
-		break;
-		
-	default:
-		if (queue_get_queue(floor, motor_dir)){
-			elev_set_motor_direction(motor_dir);			
-			el_state = S_MOVING;
-			break;
-		}else if (queue_get_queue(floor, -motor_dir)){
-			motor_dir = -motor_dir;
-			elev_set_motor_direction(motor_dir);
-			el_state = S_MOVING;
-			break;
-		}else {
-			el_state = S_IDLE;
-			break;
-		}
-		
-	}
-}
-
-
-//When time is out, close door and start elevator if there is any orders.
-void evTime_out(){
-	printf("evTime_out\n");
-	elev_set_door_open_lamp(0);
-	if (queue_get_queue(current_floor, motor_dir)){
-			elev_set_motor_direction(motor_dir);			
-			el_state = S_MOVING;
-			
-	}else if (queue_get_queue(current_floor, -motor_dir)){
-			motor_dir = -motor_dir;
-			elev_set_motor_direction(motor_dir);
-			el_state = S_MOVING;
-			
-	}
-}
-
-
-//Event for activated stop button
-void evStop_button_signal(){
-	printf("evStop_button_signal\n");
-	// Stop motor, light stop button and erase queue.
-		elev_set_motor_direction(DIRN_STOP);
-		elev_set_stop_lamp(1);
-		queue_delete_queue();
-		elev_clear_all_button_lamps();
-		if (el_state == S_AT_FLOOR){
-			elev_set_door_open_lamp(1);
-			el_state = S_STOPBUTTON_AT_FLOOR;
-		}else {		
-			el_state = S_STOPBUTTON;
-		}		
-
-}
-
-
 
