@@ -1,0 +1,68 @@
+		Oppstart:
+1. 	Sørger systemet for at heisen kommer i en definert tilstand? 
+		| JA
+2. 	Ignoreres bestillinger før heisen har kommet i en definert tilstand?
+		| JA
+3.	 Ignoreres stoppknappen under initialisering?
+		| JA
+
+		Håndtering av bestillinger:
+4. 	Går heisen til riktig etasje når en bestilling mottas fra etasjepanelet?
+		| Ja-
+5. 	Går heisen til riktig etasje når en bestilling mottas fra heispanelet?
+		| Ja-
+6. 	Hvis heisen er på vei fra 4. etg til 1. etg og noen har bestilt OPP i 2. etg:
+		- kjører heisen til 1.
+		| JA
+		- etg før den kjører til 2. etg?
+		| NEI! Kjørte faktisk forbi 2. etasje! Se ekstra logg.
+7.	Håndteres alle bestillingene hvis flere av bestillingsknappene trykkes samtidig?
+		| Ja, med mindre motor_dir ikke henger med
+8. 	Vil alle bestillinger bli ekspedert, selv med vedvarende trykking av andre knapper (unntatt stopp), 
+	dvs. blir heisen aldri ”fastlåst” mellom noen av etasjene?
+		| Ja, det skulle jeg tro. Det tok en stund før den kom seg opp til 4., men det skjedde til slutt.
+
+		Bestillingslys og etasjelys:
+9. 	Blir riktig etasjelys tent når heisen ankommer en etasje?
+		| JA
+10.	Hvis heisen befinner seg mellom 2. og 3. 
+		| JA. Både på vei opp og ned
+	etg og er på vei oppover, lyser etasjelyset i 2. etg?
+		| Som sagt
+11. Blir lyset tent i bestillingsknappene når de blir trykket?
+		| JA
+12. Slukkes lyset i bestillingsknappene når bestillingen er ekspedert, dvs. når 
+	heisen ankommer etasjen?
+		| Ja, men har innimellom en liten bug når en etasjeknapp aktiveres når den er i tilhørende etasje. Tror kø tømmes, men lys ikke slukkes
+
+		Dør (Her er det noe rart når el_state == S_IDLE)
+13.	Åpnes døren (lyser dørlyset) når heisen stopper i en etasje?
+		| 
+14.	Er døren åpen i 3 sekunder?
+		|
+15.	Står heisen stille i de 3 sekundene døren er åpen?
+		|
+16. Lukkes døren før heisen kjøres videre?
+		|
+17. Lukkes døren og står heisen stille når det ikke er noen nye bestillinger?
+		| Ja
+18.	Heisen står i ro med døren lukket etter å ha betjent alle bestillinger. Åpnes 
+	døren når en bestilling kommer fra etasjen heisen står i?
+		| Ja, med mindre det er samme knapp på nytt
+
+		Stoppknapp
+19.	Stopper heisen når stoppknappen trykkes?
+		| JA
+20. Blir bestillingene slettet (lysene på bestillingsknappene slukkes) når 
+	stoppknappen trykkes?
+		| JA
+21. Er lyset i stoppknappen kun tent mens stoppknappen er trykket?
+		| JA
+22. Ignoreres trykk på alle bestillingsknappene mens stoppknappen er trykket?
+		| Ja. Knappene tennes i korte øyeblikk, men slukkes igjen momentant, og lagres ikke i kø
+23. Blir heisen stående i ro etter at stoppknappen er sluppet?
+		| JA
+24. Husker heisen hvor den er ved nødstopp mellom etasjer (dvs. kreves ikke ny initialisering)?
+		| JA
+25. Åpnes døren hvis stoppknappen aktiveres i en etasje?
+		| Ja, men hvis døra allerede er åpen, lukkes den først...

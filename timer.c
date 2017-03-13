@@ -19,6 +19,7 @@ int timer_time_out(){
 	delta_time = (float)(clock() - start_time) / CLOCKS_PER_SEC; //Time since start_time, converted to seconds. 
 	if (delta_time > 3 && time_out == FALSE) {
 		time_out = TRUE;
+		printf("Timeout\n");
 		return TRUE;
 	}
 	return FALSE;

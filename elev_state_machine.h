@@ -7,12 +7,6 @@
 #include "timer.h"
 #include "queue.h"
 
-typedef enum {
-	FIRST,
-	SECOND,
-	THIRD,
-	FOURTH
-} el_floor;
 
 void evInitialize(void);
 
@@ -26,6 +20,6 @@ void evFloor_reached(int floor);
 void evTime_out(void);
 
 // Event Stop button is pressed
-void evStop_button_signal(int signal);
+void evStop_button_signal(int stop_signal, int floor_signal);
 
 #endif

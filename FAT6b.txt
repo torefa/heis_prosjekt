@@ -1,0 +1,82 @@
+Logg fra 6b:
+	3 2
+	evButton_pressed
+	Satt opp-queue!
+	U: [0, 0, 0, 1]
+	D: [0, 0, 0, 0]
+	CASE: IDLE
+	Opp
+	Satt opp-queue!
+	U: [0, 0, 0, 1]
+	D: [0, 0, 0, 0]
+	el_state = S_MOVING;
+	evFloor_reached: 1, motor dir = 1
+	Er det en bestilling her? 0
+	evFloor_reached: 2, motor dir = 1
+	Er det en bestilling her? 0
+	evFloor_reached: 3, motor dir = 1
+	Er det en bestilling her? 1
+	timerstart
+	HA!
+	Nei?
+	el_state = AT_FLOOR
+	U: [0, 0, 0, 0]
+	D: [0, 0, 0, 0]
+	U: [0, 0, 0, 0]
+	D: [0, 0, 0, 0]
+	el_state = S_IDLE
+	0 2
+	evButton_pressed
+	Satt ned-queue!
+	U: [0, 0, 0, 0]
+	D: [1, 0, 0, 0]
+	CASE: IDLE
+	Ned
+	Satt down-queue!
+	U: [0, 0, 0, 0]
+	D: [1, 0, 0, 0]
+	el_state = S_MOVING;
+	1 0
+	evButton_pressed
+	Satt opp-queue!
+	U: [0, 1, 0, 0]
+	D: [1, 0, 0, 0]
+	Timeout
+	el_state = S_TIMEOUT
+	evTime_out
+	U: [0, 1, 0, 0]
+	D: [1, 0, 0, 0]
+	el_state = S_MOVING
+	evFloor_reached: 2, motor dir = -1
+	Er det en bestilling her? 0
+	evFloor_reached: 1, motor dir = -1
+	Er det en bestilling her? 0
+	evFloor_reached: 0, motor dir = -1
+	Er det en bestilling her? 1
+	timerstart
+	HA!
+	Nei?
+	el_state = AT_FLOOR
+	U: [0, 1, 0, 0]
+	D: [0, 0, 0, 0]
+	U: [0, 1, 0, 0]
+	D: [0, 0, 0, 0]
+	Timeout
+	el_state = S_TIMEOUT
+	evTime_out
+	U: [0, 1, 0, 0]
+	D: [0, 0, 0, 0]
+	U: [0, 1, 0, 0]
+	D: [0, 0, 0, 0]
+	el_state = S_MOVING
+	evFloor_reached: 1, motor dir = -1
+	Er det en bestilling her? 0
+	evFloor_reached: 2, motor dir = -1
+	Er det en bestilling her? 0
+	evFloor_reached: 3, motor dir = -1
+	Er det en bestilling her? 0
+	U: [0, 1, 0, 0]
+	D: [0, 0, 0, 0]
+	U: [0, 1, 0, 0]
+	D: [0, 0, 0, 0]
+	el_state = S_IDLE

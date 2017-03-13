@@ -43,10 +43,11 @@ void evInitialize(){
 }
 
 void evFloor_reached(int floor){
-	printf("evFloor_reached: %d, motor dir = %d\n",floor,motor_dir);
+	printf("evFloor_reached: %d, motor dir = %d\n", floor, motor_dir);
 	elev_set_floor_indicator(floor);
 	current_floor = floor;
 	printf("Er det en bestilling her? %d\n", queue_check_floor(current_floor, motor_dir));
+
 	if (queue_check_floor(current_floor, motor_dir) == TRUE){
 		elev_set_motor_direction(DIRN_STOP);
 		timer_start();
@@ -59,14 +60,17 @@ void evFloor_reached(int floor){
 			
 		//Set state
 		el_state = S_AT_FLOOR;
-		
+		printf("el_state = AT_FLOOR\n");
 		//erase floor from queue.
 		queue_delete_floor(current_floor);
 			
 		if(!queue_get_queue(floor, motor_dir) && !queue_get_queue(floor, -motor_dir)){ 	//Trengs denne?
-			el_state = S_IDLE;															//Men hvis vi skal ha den, burde vi ha true og false
+			el_state = S_IDLE;
+			printf("el_state = S_IDLE\n");															//Men hvis vi skal ha den, burde vi ha true og false
 		}
-	}	
+	}	else if (floor == FIRST || floor == FOURTH){
+			drive(current_floor, motor_dir);
+	}
 }
 
 
@@ -83,13 +87,10 @@ void evButton_pressed(elev_button_type_t button, int floor){
 	//Check button type and set the relevant queue.
 	if (button == BUTTON_CALL_UP && floor != FOURTH){	//Kan fc ta inn dette?
 		queue_set_up_queue(floor);
-		printf("Satt opp-queue!\n");
 	} else if (button == BUTTON_CALL_DOWN && floor != FIRST){ //Kan fc ta inn dette?
-		queue_set_down_queue(floor);
-		printf("Satt ned-queue!\n");		
+		queue_set_down_queue(floor);		
 	} else if (button == BUTTON_COMMAND){		
 		queue_set_queue(floor, current_floor);
-		printf("Satt begge queues!\n");
 	}
 	
 	//Start elevator in direction of button order if not already moving.
@@ -97,14 +98,21 @@ void evButton_pressed(elev_button_type_t button, int floor){
 	case S_IDLE:
 		printf("CASE: IDLE\n");
 		if (floor - current_floor > 0){
-		printf("Opp\n");
+			printf("Opp\n");
+			queue_set_up_queue(floor);	//Det finnes kanskje en bedre måte å løse dette problemet på?
 			elev_set_motor_direction(DIRN_UP);
-				motor_dir = DIRN_UP;
+			motor_dir = DIRN_UP;
+			el_state = S_MOVING;
+			printf("el_state = S_MOVING;\n");
 
 		} else if (floor - current_floor < 0){
-		printf("Ned\n");
+			printf("Ned\n");
+			queue_set_down_queue(floor);
 			elev_set_motor_direction(DIRN_DOWN);
-				motor_dir = DIRN_DOWN;
+			motor_dir = DIRN_DOWN;
+			el_state = S_MOVING;
+			printf("el_state = S_MOVING;\n");
+
 		} else{
 			timer_start();
 			printf("HA!\n");
@@ -116,7 +124,8 @@ void evButton_pressed(elev_button_type_t button, int floor){
 			
 			//Set state
 			el_state = S_AT_FLOOR;
-		
+			printf("el_state = S_AT_FLOOR\n");
+
 			//erase floor from queue.
 			queue_delete_floor(current_floor);
 		}
@@ -124,16 +133,18 @@ void evButton_pressed(elev_button_type_t button, int floor){
 		
 	case S_TIMEOUT:
 		drive(current_floor, motor_dir);
-		
+		break;
+
 	default:
 		break;
 	}
 }
 
 
-//When time is out, close door and start elevator if there is any orders.
+//When time is out, close door and start elevator if there are any orders.
 void evTime_out(){
 	el_state = S_TIMEOUT;
+	printf("el_state = S_TIMEOUT\n");
 	printf("evTime_out\n");
 	elev_set_door_open_lamp(OFF);
 	drive(current_floor, motor_dir);
@@ -141,46 +152,42 @@ void evTime_out(){
 
 
 //Event for activated stop button
-void evStop_button_signal(int signal){
-	printf("evStop_button_signal: \n", signal);
-		if (signal == TRUE){
+void evStop_button_signal(int stop_signal, int floor_signal){
+	printf("evStop_button_signal. Stop_signal: %d, Floor_signal: %d\n", stop_signal, floor_signal);
+		if (stop_signal == TRUE){
 		// Stop motor, light stop button and erase queue.
+			el_state = S_STOPBUTTON;
+			printf("el_state = S_STOPBUTTON\n");
 			elev_set_motor_direction(DIRN_STOP);
 			elev_set_stop_lamp(ON);
 			queue_delete_queue();
 			elev_clear_all_button_lamps();
-			if (el_state == S_AT_FLOOR){
+			if (floor_signal > -1){
 				elev_set_door_open_lamp(ON);
-				el_state = S_STOPBUTTON_AT_FLOOR;
-			} else{		
-					el_state = S_STOPBUTTON;
 			}
 	} else{
 		elev_set_stop_lamp(OFF);
-		
-		if(el_state == S_STOPBUTTON_AT_FLOOR){
-			el_state = S_IDLE;
-			elev_set_door_open_lamp(OFF);
-			
-		} else if(el_state == S_STOPBUTTON){
-			el_state = S_IDLE;
-		}
-		
+		elev_set_door_open_lamp(OFF);
+		el_state = S_IDLE;
+		printf("el_state = S_IDLE\n");
 	}
 }
 
 static void drive(int current_floor, int motor_dir){
-	if (queue_get_queue(current_floor, motor_dir)){
+	if (queue_get_queue(current_floor, motor_dir) == TRUE){
 			elev_set_motor_direction(motor_dir);			
 			el_state = S_MOVING;
+			printf("el_state = S_MOVING\n");
 			
-	} else if (queue_get_queue(current_floor, -motor_dir)){
+	} else if (queue_get_queue(current_floor, -motor_dir) == TRUE){
 			motor_dir = -motor_dir;
 			elev_set_motor_direction(motor_dir);
 			el_state = S_MOVING;
-			
+			printf("el_state = S_MOVING\n");
+
 	} else{
-		el_state = S_IDLE
+		el_state = S_IDLE;
+		printf("el_state = S_IDLE\n");
 	}
 }
 
