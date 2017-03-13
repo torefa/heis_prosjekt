@@ -2,8 +2,8 @@ Endringslogg:
 	- Har lagd en egen drive-fc i FSM for å minimere kode
 	- Har lagd utgang fra evStopp(...) til å endre state
 	- Lager en egen state S_TIMEOUT for å hindre at heisen kjører videre før timeren er ute
-		- Nå kan man kun kjøre videre fra evButton_pressed hvis el_state er S_IDLE eller S_TIMEOUT
-		- Men evTimeout kjører selv videre. Så ^ treger egentlig bare å kjøre videre hvis el_state == S_IDLE
+		- Ser nå at den kanskje ikke trengs allikevel. Fra evTime_out() går elState enten til S_MOVING eller S_IDLE.
+		- Det betyr at det vil ikke switches til S_TIMEOUT i evButton_pressed().
 	- Har gjort det sånn at evStopp(...) alltid går inn i el_state S_IDLE.
 	- I evButton_pressed: Hvis floor == current_floor, åpner heisen døra og starter timer
 	- Flyttet includes til .h

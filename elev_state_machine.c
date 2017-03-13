@@ -9,8 +9,8 @@ typedef enum {
 		S_MOVING,
 		S_AT_FLOOR,
 		S_STOPBUTTON,
-		S_STOPBUTTON_AT_FLOOR,
-		S_TIMEOUT
+		S_STOPBUTTON_AT_FLOOR,	//Har fjernet staen fra koden
+		S_TIMEOUT 				//Trengs nok ikke allikevel
 } ELState;
 
 static ELState el_state = S_IDLE;
@@ -26,8 +26,9 @@ static int ON = 1;
 
 void evInitialize(){
 	// Initialize hardware
+	printf("Initialiserer\n");
     if (!elev_init()) {
-        printf("Unable to initialize elevator hardware!\n");
+        printf("Klarte ikke å iniatilisere hardware\n");
     }
 	
 	//initialize elevator
@@ -39,7 +40,9 @@ void evInitialize(){
 			break;
 		}
 	}
-	el_state = S_IDLE;	
+	el_state = S_IDLE;
+	printf("el_state = S_IDLE\n");
+	printf("Initialisering vellykket\n");
 }
 
 void evFloor_reached(int floor){
@@ -51,9 +54,8 @@ void evFloor_reached(int floor){
 	if (queue_check_floor(current_floor, motor_dir) == TRUE){
 		elev_set_motor_direction(DIRN_STOP);
 		timer_start();
-		printf("HA!\n");
 		elev_set_door_open_lamp(ON);
-		printf("Nei?\n");
+		printf("Dør åpen\n");
 		
 		//Turn off button lamps for the floor
 		elev_turn_off_button_lamp(current_floor);
@@ -61,12 +63,16 @@ void evFloor_reached(int floor){
 		//Set state
 		el_state = S_AT_FLOOR;
 		printf("el_state = AT_FLOOR\n");
-		//erase floor from queue.
+		
+		//Remove floor from queue.
 		queue_delete_floor(current_floor);
 			
-		if(!queue_get_queue(floor, motor_dir) && !queue_get_queue(floor, -motor_dir)){ 	//Trengs denne?
-			el_state = S_IDLE;
-			printf("el_state = S_IDLE\n");															//Men hvis vi skal ha den, burde vi ha true og false
+		//Tror denne følgende del av koden gjør at heisen går inn i S_IDLE før evTime_out, 
+		// og at heisen dermed kjører med åpen dør.
+		
+		// if(!queue_get_queue(floor, motor_dir) && !queue_get_queue(floor, -motor_dir)){ 
+		//	el_state = S_IDLE;
+		//	printf("el_state = S_IDLE\n");
 		}
 	}	else if (floor == FIRST || floor == FOURTH){
 			drive(current_floor, motor_dir);
@@ -85,9 +91,9 @@ void evButton_pressed(elev_button_type_t button, int floor){
 	
 	
 	//Check button type and set the relevant queue.
-	if (button == BUTTON_CALL_UP && floor != FOURTH){	//Kan fc ta inn dette?
+	if (button == BUTTON_CALL_UP && floor != FOURTH){	//Kan fc ta inn feil verdier?
 		queue_set_up_queue(floor);
-	} else if (button == BUTTON_CALL_DOWN && floor != FIRST){ //Kan fc ta inn dette?
+	} else if (button == BUTTON_CALL_DOWN && floor != FIRST){ //Kan fc ta inn feil verdier?
 		queue_set_down_queue(floor);		
 	} else if (button == BUTTON_COMMAND){		
 		queue_set_queue(floor, current_floor);
@@ -115,10 +121,9 @@ void evButton_pressed(elev_button_type_t button, int floor){
 
 		} else{
 			timer_start();
-			printf("HA!\n");
 			elev_set_door_open_lamp(ON);
-			printf("Nei?\n");
-		
+			printf("Dør åpen\n");
+			
 			//Turn off button lamps for the floor
 			elev_turn_off_button_lamp(current_floor);
 			
@@ -126,7 +131,7 @@ void evButton_pressed(elev_button_type_t button, int floor){
 			el_state = S_AT_FLOOR;
 			printf("el_state = S_AT_FLOOR\n");
 
-			//erase floor from queue.
+			//Remove floor from queue.
 			queue_delete_floor(current_floor);
 		}
 		break;
@@ -143,10 +148,11 @@ void evButton_pressed(elev_button_type_t button, int floor){
 
 //When time is out, close door and start elevator if there are any orders.
 void evTime_out(){
-	el_state = S_TIMEOUT;
+	el_state = S_TIMEOUT; //Tror ikke denne staten egentlig trengs allikevel
 	printf("el_state = S_TIMEOUT\n");
 	printf("evTime_out\n");
 	elev_set_door_open_lamp(OFF);
+	printf("Dør lukket\n");
 	drive(current_floor, motor_dir);
 }
 
@@ -162,7 +168,7 @@ void evStop_button_signal(int stop_signal, int floor_signal){
 			elev_set_stop_lamp(ON);
 			queue_delete_queue();
 			elev_clear_all_button_lamps();
-			if (floor_signal > -1){
+			if (floor_signal > -1){ // TRUE if elevator is at a floor
 				elev_set_door_open_lamp(ON);
 			}
 	} else{
