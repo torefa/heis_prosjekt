@@ -5,7 +5,7 @@
 static int NO_ORDER = 0;
 static int ORDER = 1;
 
-static int up_queue[4] = {0};
+static int up_queue[4] = {0};	//Skulle gjerne brukt N_FLOORS
 static int down_queue[4] = {0};
 
 
@@ -20,19 +20,22 @@ void queue_set_queue(int order, int pos){
 		down_queue[order] = ORDER;
 		printf("Satt ned-queue!\n");
 	}
-	printf("U: [%d, %d, %d, %d]\nD: [%d, %d, %d, %d]\n", up_queue[0], up_queue[1], up_queue[2], up_queue[3], down_queue[0], down_queue[1], down_queue[2], down_queue[3]);
+	printf("U: [%d, %d, %d, %d]\nD: [%d, %d, %d, %d]\n", 
+		up_queue[0], up_queue[1], up_queue[2], up_queue[3], down_queue[0], down_queue[1], down_queue[2], down_queue[3]);
 }
 
 void queue_set_up_queue(int order){
 	printf("Satt opp-queue!\n");
 	up_queue[order] = ORDER;
-	printf("U: [%d, %d, %d, %d]\nD: [%d, %d, %d, %d]\n", up_queue[0], up_queue[1], up_queue[2], up_queue[3], down_queue[0], down_queue[1], down_queue[2], down_queue[3]);
+	printf("U: [%d, %d, %d, %d]\nD: [%d, %d, %d, %d]\n", 
+		up_queue[0], up_queue[1], up_queue[2], up_queue[3], down_queue[0], down_queue[1], down_queue[2], down_queue[3]);
 }
 
 void queue_set_down_queue(int order){
-	printf("Satt down-queue!\n");
+	printf("Satt ned-queue!\n");
 	down_queue[order] = ORDER;
-	printf("U: [%d, %d, %d, %d]\nD: [%d, %d, %d, %d]\n", up_queue[0], up_queue[1], up_queue[2], up_queue[3], down_queue[0], down_queue[1], down_queue[2], down_queue[3]);
+	printf("U: [%d, %d, %d, %d]\nD: [%d, %d, %d, %d]\n", 
+		up_queue[0], up_queue[1], up_queue[2], up_queue[3], down_queue[0], down_queue[1], down_queue[2], down_queue[3]);
 }
 
 void queue_delete_floor(int floor){
@@ -47,9 +50,9 @@ void queue_delete_queue(void){
 }
 
 int queue_check_floor(int floor, int motor_dir){
-	if (motor_dir == 1){
+	if (motor_dir == 1){			//Skulle gjrene brukt DIRN_UP
 		return up_queue[floor];
-	} else if (motor_dir == -1){
+	} else if (motor_dir == -1){	//Skulle gjerne brukt DIRN_DOWN
 		return down_queue[floor];
 
 	}
@@ -58,8 +61,9 @@ int queue_check_floor(int floor, int motor_dir){
 
 int queue_get_queue(int floor, int motor_dir){
 	int i;
-	int temp;
-	printf("U: [%d, %d, %d, %d]\nD: [%d, %d, %d, %d]\n", up_queue[0], up_queue[1], up_queue[2], up_queue[3], down_queue[0], down_queue[1], down_queue[2], down_queue[3]);
+	int temp; //Kanskje ikke nødvendig?
+	printf("U: [%d, %d, %d, %d]\nD: [%d, %d, %d, %d]\n", 
+		up_queue[0], up_queue[1], up_queue[2], up_queue[3], down_queue[0], down_queue[1], down_queue[2], down_queue[3]);
 	for (i = floor; (i > -1) && (i < 4); i = i + motor_dir){	//Checks all floors in direction elevator is moving for orders
 		//fprintf("i = %d\n", i);
 		if(queue_check_floor(i, motor_dir) == ORDER){
