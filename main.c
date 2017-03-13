@@ -12,6 +12,7 @@ void poll_timer();
 
 static int last_floor = 10;		// Initialized to not conflict with actual floors
 static int last_button = 10;	// Initialized to not conflict with actual buttons
+static int a = 10;				// Dårlig for lesbarhet, men nå funker polling av sensor
 
 int main() {
       // Initialize hardware
