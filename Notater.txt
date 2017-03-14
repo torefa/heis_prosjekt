@@ -1,0 +1,674 @@
+Endringslogg:
+	- Har lagd en egen drive-fc i FSM for å minimere kode
+	- Har lagd utgang fra evStopp(...) til å endre state
+	- Lager en egen state S_TIMEOUT for å hindre at heisen kjører videre før timeren er ute
+		- Ser nå at den kanskje ikke trengs allikevel. Fra evTime_out() går elState enten til S_MOVING eller S_IDLE.
+		- Det betyr at det vil ikke switches til S_TIMEOUT i evButton_pressed().
+	- Har gjort det sånn at evStopp(...) alltid går inn i el_state S_IDLE.
+	- I evButton_pressed: Hvis floor == current_floor, åpner heisen døra og starter timer
+	- Flyttet includes til .h
+	- Har laget OFF = 0 og ON = 1 for lamper i FSM, og NO_ORDER = 0 og ORDER = 1 i queue.
+		- TRUE og FALSE samt el_floors i en egen header "definitions.h"
+	- Har lagt #includes i .h-filer, og byttet pragma once med #ifndef xxx og #define xxx. Har hørt at det er bedre.
+	- La til en if else i ev_floor... som stopper motor i 1. og 4. etasje (Trengs denne nå? Tør ikke fjerne ATM)
+	
+Tanker:
+	- Burde evEvent bytte navn? For kontinuitet
+	- Trengs S_ forran states? Er det kanskje selvforklarende?
+	- Tregs egentlig S_STOP_BUTTON_AT_FLOOR? -> Fjernet fra evStop. Funker fjell nå
+	- Trenger man å sjekke om køen er tom i evFloor_reached?
+	- Må elev.c og io.c også ha god lesbarhet??
+
+
+Hva fungerer ikke
+	- Når elState == S_IDLE, vil motor_dir og dir_queue være motsat :/ (ikke nå lenger?)
+	- I main: Hvis man er i en etasje, vil dette forhindre at man kan trykke knapper tilknyttet samme etasje D: (Ikke nå, men sjekkvariablen burde ha et annet navn, eller ha en annen verdi (på samme måte som med stopp))
+
+	- Heisen kjørte videre fra 1. etasje før døra var lukket! Mulig bivirkning av 1. eller 4. sjekken i evFloor_reached. Skjer kanskje hvis man legger til første bestilling i køen. Altså man kjører fra IDLE?
+		logg:
+			evFloor_reached: 3, motor dir = 1
+			Er det en bestilling her? 0
+			U: [0, 0, 0, 0]
+			D: [0, 0, 0, 0]
+			U: [0, 0, 0, 0]
+			D: [0, 0, 0, 0]
+			el_state = S_IDLE
+			evStop_button_signal. Stop_signal: 1, Floor_signal: 3
+			el_state = S_STOPBUTTON
+			evStop_button_signal. Stop_signal: 0, Floor_signal: 3
+			el_state = S_IDLE
+			evStop_button_signal. Stop_signal: 1, Floor_signal: 3
+			el_state = S_STOPBUTTON
+			evStop_button_signal. Stop_signal: 0, Floor_signal: 3
+			el_state = S_IDLE
+			0 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [1, 0, 0, 0]
+			D: [0, 0, 0, 0]
+			CASE: IDLE
+			Ned
+			Satt down-queue!
+			U: [1, 0, 0, 0]
+			D: [1, 0, 0, 0]
+			el_state = S_MOVING;
+			evFloor_reached: 2, motor dir = -1
+			Er det en bestilling her? 0
+			evFloor_reached: 1, motor dir = -1
+			Er det en bestilling her? 0
+			evFloor_reached: 0, motor dir = -1
+			Er det en bestilling her? 1
+			timerstart
+			HA!
+			Nei?
+			el_state = AT_FLOOR
+			U: [0, 0, 0, 0]
+			D: [0, 0, 0, 0]
+			U: [0, 0, 0, 0]
+			D: [0, 0, 0, 0]
+			el_state = S_IDLE
+			3 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 0, 0]
+			D: [0, 0, 0, 1]
+			CASE: IDLE
+			Opp
+			Satt opp-queue!
+			U: [0, 0, 0, 1]
+			D: [0, 0, 0, 1]
+			el_state = S_MOVING;
+			Timeout
+			el_state = S_TIMEOUT
+			evTime_out
+			U: [0, 0, 0, 1]
+			D: [0, 0, 0, 1]
+			el_state = S_MOVING
+			evFloor_reached: 1, motor dir = 1
+			Er det en bestilling her? 0
+			evFloor_reached: 2, motor dir = 1
+			Er det en bestilling her? 0
+			evFloor_reached: 3, motor dir = 1
+			Er det en bestilling her? 1
+			timerstart
+			HA!
+			Nei?
+			el_state = AT_FLOOR
+			U: [0, 0, 0, 0]
+			D: [0, 0, 0, 0]
+			U: [0, 0, 0, 0]
+			D: [0, 0, 0, 0]
+			el_state = S_IDLE
+			Timeout
+			el_state = S_TIMEOUT
+			evTime_out
+			U: [0, 0, 0, 0]
+			D: [0, 0, 0, 0]
+			U: [0, 0, 0, 0]
+			D: [0, 0, 0, 0]
+			el_state = S_IDLE
+
+
+	- Det er noe rart med at motor_dir ikke endres når retningen snur:
+		- logg:
+			el_state = S_IDLE
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 0, 0, 0]
+			CASE: IDLE
+			Opp
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 0, 0, 0]
+			el_state = S_MOVING;
+			evFloor_reached: 1, motor dir = 1
+			Er det en bestilling her? 0
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			evFloor_reached: 2, motor dir = 1
+			Er det en bestilling her? 1
+			timerstart
+			HA!
+			Nei?
+			el_state = AT_FLOOR
+			U: [0, 0, 0, 0]
+			D: [0, 1, 0, 0]
+			U: [0, 0, 0, 0]
+			D: [0, 1, 0, 0]
+			Timeout
+			el_state = S_TIMEOUT
+			evTime_out
+			U: [0, 0, 0, 0]
+			D: [0, 1, 0, 0]
+			U: [0, 0, 0, 0]
+			D: [0, 1, 0, 0]
+			el_state = S_MOVING
+			evFloor_reached: 1, motor dir = 1
+			Er det en bestilling her? 0
+			evFloor_reached: 0, motor dir = 1
+			Er det en bestilling her? 0
+			U: [0, 0, 0, 0]
+			D: [0, 1, 0, 0]
+			U: [0, 0, 0, 0]
+			D: [0, 1, 0, 0]
+			el_state = S_IDLE
+
+		Også (Action helt nederst):
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			1 1
+			evButton_pressed
+			Satt down-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			2 0
+			evButton_pressed
+			Satt opp-queue!
+			U: [0, 0, 1, 0]
+			D: [0, 1, 0, 0]
+			evFloor_reached: 1, motor dir = -1
+			Er det en bestilling her? 1
+			timerstart
+			HA!
+			Nei?
+			el_state = AT_FLOOR
+			U: [0, 0, 1, 0]
+			D: [0, 0, 0, 0]
+			U: [0, 0, 1, 0]
+			D: [0, 0, 0, 0]
+			Timeout
+			el_state = S_TIMEOUT
+			evTime_out
+			U: [0, 0, 1, 0]
+			D: [0, 0, 0, 0]
+			U: [0, 0, 1, 0]
+			D: [0, 0, 0, 0]
+			el_state = S_MOVING
+			evFloor_reached: 2, motor dir = -1
+			Er det en bestilling her? 0
+			evFloor_reached: 3, motor dir = -1
+			Er det en bestilling her? 0
+			U: [0, 0, 1, 0]
+			D: [0, 0, 0, 0]
+			U: [0, 0, 1, 0]
+			D: [0, 0, 0, 0]
+			el_state = S_IDLE
+			evStop_button_signal. Stop_signal: 1, Floor_signal: -1
+			el_state = S_STOPBUTTON
+			evStop_button_signal. Stop_signal: 0, Floor_signal: -1
+			el_state = S_IDLE
+			evFloor_reached: 3, motor dir = -1
+			Er det en bestilling her? 0
+			U: [0, 0, 0, 0]
+			D: [0, 0, 0, 0]
+			U: [0, 0, 0, 0]
+			D: [0, 0, 0, 0]
+			el_state = S_IDLE
+
+
