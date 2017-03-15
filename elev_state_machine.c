@@ -172,13 +172,13 @@ void evStop_button_signal(int stop_signal, int floor_signal){
 				elev_set_door_open_lamp(ON);
 				printf("Dør åpen\n")
 			}
-	} else{
-		elev_set_stop_lamp(OFF);
-		elev_set_door_open_lamp(OFF);
-		printf("Dør lukket\n")
-		el_state = S_IDLE;
-		printf("el_state = S_IDLE\n");
-	}
+		} else{
+			elev_set_stop_lamp(OFF);
+			elev_set_door_open_lamp(OFF);
+			printf("Dør lukket\n")
+			el_state = S_IDLE;
+			printf("el_state = S_IDLE\n");
+		}
 }
 
 static void drive(int current_floor, int motor_dir){
