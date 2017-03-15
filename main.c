@@ -65,8 +65,8 @@ void poll_sensors(){
 	int floor = elev_get_floor_sensor_signal();
 	if(floor >= FIRST && floor < N_FLOORS && floor != a){
 		evFloor_reached(floor);
+		a = floor;
 	}
-	a = floor;
 }
 
 void poll_timer(){
