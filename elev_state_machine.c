@@ -181,14 +181,14 @@ void evStop_button_signal(int stop_signal, int floor_signal){
 		}
 }
 
-static void drive(int current_floor, int motor_dir){
-	if (queue_get_queue(current_floor, motor_dir) == TRUE){
+static void drive(int current_floor, int temp_motor_dir){
+	if (queue_get_queue(current_floor, temp_motor_dir) == TRUE){
 			elev_set_motor_direction(motor_dir);			
 			el_state = S_MOVING;
 			printf("el_state = S_MOVING\n");
 			
-	} else if (queue_get_queue(current_floor, -motor_dir) == TRUE){
-			motor_dir = -motor_dir;
+	} else if (queue_get_queue(current_floor, -temp_motor_dir) == TRUE){
+			motor_dir = -temp_motor_dir;
 			elev_set_motor_direction(motor_dir);
 			el_state = S_MOVING;
 			printf("el_state = S_MOVING\n");
