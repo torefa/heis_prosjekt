@@ -9,7 +9,7 @@ typedef enum {
 		S_MOVING,
 		S_AT_FLOOR,
 		S_STOPBUTTON,
-		S_STOPBUTTON_AT_FLOOR,	//Har fjernet staen fra koden
+		S_STOPBUTTON_AT_FLOOR,	//Har fjernet tilstanden fra koden
 		S_TIMEOUT 				//Trengs nok ikke allikevel
 } ELState;
 
@@ -75,7 +75,7 @@ void evFloor_reached(int floor){
 		//	printf("el_state = S_IDLE\n");
 		}
 	}	else if (floor == FIRST || floor == FOURTH){
-			drive(current_floor, motor_dir);
+			drive(current_floor, motor_dir); //Stops the elevator if the queue is empty when reaching 1st ot 4th floor
 	}
 }
 
@@ -100,7 +100,7 @@ void evButton_pressed(elev_button_type_t button, int floor){
 	}
 	
 	//Start elevator in direction of button order if not already moving.
-	switch(el_state){		
+	switch(el_state){ //Holder kanskje med en if?
 	case S_IDLE:
 		printf("CASE: IDLE\n");
 		if (floor - current_floor > 0){
@@ -148,7 +148,7 @@ void evButton_pressed(elev_button_type_t button, int floor){
 
 //When time is out, close door and start elevator if there are any orders.
 void evTime_out(){
-	el_state = S_TIMEOUT; //Tror ikke denne staten egentlig trengs allikevel
+	el_state = S_TIMEOUT; //Tror ikke denne tilstanden egentlig trengs allikevel
 	printf("el_state = S_TIMEOUT\n");
 	printf("evTime_out\n");
 	elev_set_door_open_lamp(OFF);
