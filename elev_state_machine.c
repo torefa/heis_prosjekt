@@ -106,16 +106,16 @@ void evButton_pressed(elev_button_type_t button, int floor){
 		if (floor - current_floor > 0){
 			printf("Opp\n");
 			queue_set_up_queue(floor);	//Det finnes kanskje en bedre måte å løse dette problemet på?
-			elev_set_motor_direction(DIRN_UP);
 			motor_dir = DIRN_UP;
+			elev_set_motor_direction(motor_dir);
 			el_state = S_MOVING;
 			printf("el_state = S_MOVING;\n");
 
 		} else if (floor - current_floor < 0){
 			printf("Ned\n");
 			queue_set_down_queue(floor);
-			elev_set_motor_direction(DIRN_DOWN);
 			motor_dir = DIRN_DOWN;
+			elev_set_motor_direction(motor_dir);
 			el_state = S_MOVING;
 			printf("el_state = S_MOVING;\n");
 
@@ -168,14 +168,14 @@ void evStop_button_signal(int stop_signal, int floor_signal){
 			elev_set_stop_lamp(ON);
 			queue_delete_queue();
 			elev_clear_all_button_lamps();
-			if (floor_signal > -1){ // TRUE if elevator is at a floor
+			if (floor_signal > -1){	// TRUE if elevator is at a floor. Opens door.
 				elev_set_door_open_lamp(ON);
 				printf("Dør åpen\n")
 			}
 		} else{
 			elev_set_stop_lamp(OFF);
 			elev_set_door_open_lamp(OFF);
-			printf("Dør lukket\n");
+			printf("Dør lukket\n");	//Ooops. Dette skrives ut også hvis døren var lukket til å begynne med...
 			el_state = S_IDLE;
 			printf("el_state = S_IDLE\n");
 		}
