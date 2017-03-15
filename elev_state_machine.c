@@ -19,8 +19,8 @@ static ELState el_state = S_IDLE;
 static int current_floor;
 static int motor_dir = DIRN_UP;
 
-#define OFF  0;
-#define ON 1;
+#define OFF 0
+#define ON 1
 
 
 
@@ -70,8 +70,7 @@ void evFloor_reached(int floor){
 		//Remove floor from queue.
 		queue_delete_floor(current_floor);
 			
-		}
-	}	else if (floor == FIRST || floor == FOURTH){
+	} else if (floor == FIRST || floor == FOURTH){
 			drive(current_floor, motor_dir); //Stops the elevator if the queue is empty when reaching 1st ot 4th floor
 	}
 }
@@ -167,7 +166,7 @@ void evStop_button_signal(int stop_signal, int floor_signal){
 			elev_clear_all_button_lamps();
 			if (floor_signal > -1){	// TRUE if elevator is at a floor. Opens door.
 				elev_set_door_open_lamp(ON);
-				printf("Dør åpen\n")
+				printf("Dør åpen\n");
 			}
 		} else{
 			elev_set_stop_lamp(OFF);

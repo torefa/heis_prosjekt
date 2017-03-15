@@ -2,8 +2,8 @@
 
 #include <stdio.h>
 
-#define NO_ORDER 0;
-#define ORDER 1;
+#define NO_ORDER 0
+#define ORDER 1
 
 static int up_queue[4] = {0};	//Skulle gjerne brukt N_FLOORS
 static int down_queue[4] = {0};
