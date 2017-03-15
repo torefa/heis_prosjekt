@@ -1,6 +1,6 @@
 // Header file containing definitions used by multiple modules
 
-// Tregs en forklaring?? Burde det egentlig være en enum? Det fikk heg ikke kjørt
+// Definitions for floors
 #define FIRST 0
 #define SECOND 1
 #define THIRD 2

@@ -4,15 +4,16 @@
 
 static void drive(int current_floor, int motor_dir);
 
+// Defining the different states
 typedef enum {
 		S_IDLE,
 		S_MOVING,
 		S_AT_FLOOR,
 		S_STOPBUTTON,
-		S_STOPBUTTON_AT_FLOOR,	//Har fjernet tilstanden fra koden
-		S_TIMEOUT 				//Trengs nok ikke allikevel
+		S_TIMEOUT
 } ELState;
 
+// Initializing variables.
 static ELState el_state = S_IDLE;
 
 static int current_floor;
@@ -23,7 +24,7 @@ static int motor_dir = DIRN_UP;
 
 
 
-
+// Initializing hardware and elevator.
 void evInitialize(){
 	// Initialize hardware
 	printf("Initialiserer\n");
@@ -45,6 +46,8 @@ void evInitialize(){
 	printf("Initialisering vellykket\n");
 }
 
+// Event floor reached. Check queue for the floor. 
+// Stop elevator and start timer if floor is in the right queue.
 void evFloor_reached(int floor){
 	printf("evFloor_reached: %d, motor dir = %d\n", floor, motor_dir);
 	elev_set_floor_indicator(floor);
@@ -67,19 +70,13 @@ void evFloor_reached(int floor){
 		//Remove floor from queue.
 		queue_delete_floor(current_floor);
 			
-		//Tror denne følgende del av koden gjør at heisen går inn i S_IDLE før evTime_out, 
-		// og at heisen dermed kjører med åpen dør.
-		
-		// if(!queue_get_queue(floor, motor_dir) && !queue_get_queue(floor, -motor_dir)){ 
-		//	el_state = S_IDLE;
-		//	printf("el_state = S_IDLE\n");
 		}
 	}	else if (floor == FIRST || floor == FOURTH){
 			drive(current_floor, motor_dir); //Stops the elevator if the queue is empty when reaching 1st ot 4th floor
 	}
 }
 
-
+// Event button is pressed. 
 void evButton_pressed(elev_button_type_t button, int floor){
 	printf("evButton_pressed\n");
 	
@@ -124,10 +121,10 @@ void evButton_pressed(elev_button_type_t button, int floor){
 			elev_set_door_open_lamp(ON);
 			printf("Dør åpen\n");
 			
-			//Turn off button lamps for the floor
+			//Turn off button lamps for the floor.
 			elev_turn_off_button_lamp(current_floor);
 			
-			//Set state
+			// Set state.
 			el_state = S_AT_FLOOR;
 			printf("el_state = S_AT_FLOOR\n");
 
@@ -145,8 +142,8 @@ void evButton_pressed(elev_button_type_t button, int floor){
 	}
 }
 
-
-//When time is out, close door and start elevator if there are any orders.
+// Event time is out.
+// When time is out, close door and start elevator if there are any orders.
 void evTime_out(){
 	el_state = S_TIMEOUT; //Tror ikke denne tilstanden egentlig trengs allikevel
 	printf("el_state = S_TIMEOUT\n");
@@ -157,7 +154,7 @@ void evTime_out(){
 }
 
 
-//Event for activated stop button
+// Event for activated stop button.
 void evStop_button_signal(int stop_signal, int floor_signal){
 	printf("evStop_button_signal. Stop_signal: %d, Floor_signal: %d\n", stop_signal, floor_signal);
 		if (stop_signal == TRUE){
@@ -181,6 +178,7 @@ void evStop_button_signal(int stop_signal, int floor_signal){
 		}
 }
 
+// Function for running checking the queues and running the elevator.
 static void drive(int current_floor, int temp_motor_dir){
 	if (queue_get_queue(current_floor, temp_motor_dir) == TRUE){
 			elev_set_motor_direction(motor_dir);			
