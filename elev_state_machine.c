@@ -18,8 +18,8 @@ static ELState el_state = S_IDLE;
 static int current_floor;
 static int motor_dir = DIRN_UP;
 
-static int OFF = 0;
-static int ON = 1;
+#define OFF  0;
+#define ON 1;
 
 
 
