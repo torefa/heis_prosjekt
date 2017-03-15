@@ -147,6 +147,7 @@ void elev_set_button_lamp(elev_button_type_t button, int floor, int value) {
         io_clear_bit(lamp_channel_matrix[floor][button]);
 }
 
+// Shut of button lamp at active floor.
 void elev_turn_off_button_lamp(int floor){
 	if(floor != 0){
 		elev_set_button_lamp(BUTTON_CALL_DOWN, floor, 0);
@@ -158,6 +159,7 @@ void elev_turn_off_button_lamp(int floor){
 	
 }
 
+// Shut of all button lamps. (Stop button pressed).
 void elev_clear_all_button_lamps(){
 	int i;
 	 for (i = 0; i < N_FLOORS; ++i) {

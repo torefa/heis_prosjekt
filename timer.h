@@ -1,4 +1,4 @@
-//Header for the timer class
+//Header for the timer class.
 #ifndef timer
 #define timer
 
@@ -10,7 +10,7 @@
 // Function to start the timer.
 void timer_start();
 
-// Funtion to notify that the time is out
+// Funtion to notify that the time is out.
 int timer_time_out();
 
 #endif
