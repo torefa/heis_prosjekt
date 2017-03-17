@@ -22,8 +22,9 @@ static int motor_dir = DIRN_UP;
 #define ON 1
 
 
-
-// Initializing hardware and elevator.
+/*
+Initializing hardware and elevator.
+*/
 void evInitialize(){
 	// Initialize hardware
     if (!elev_init()) {
@@ -45,8 +46,10 @@ void evInitialize(){
 
 
 
-// Event floor reached. Check queue for the floor. 
-// Stop elevator and start timer if floor is in the right queue.
+/*
+	Event floor reached
+Check queue for the floor. Stop elevator and start timer if floor is in the queue for the current direction.
+*/
 void evFloor_reached(int floor){
 	elev_set_floor_indicator(floor);
 	current_floor = floor;
@@ -65,11 +68,13 @@ void evFloor_reached(int floor){
 	}
 }
 
-
-// Event button is pressed. 
+/*
+	Event button is pressed
+Updates the relevant queue. If the elevator is idle, it will start the motor in the direction the button indicates.
+*/
 void evButton_pressed(elev_button_type_t button, int floor){
 	
-	//Check button type and set the relevant lamp.
+	//Check button type and set the relevant lamp. Ensures only valid buttons are passed as function calls.
 	if(floor != -1 && !(floor == FIRST && button == BUTTON_CALL_DOWN) && !(floor == FOURTH	&& button == BUTTON_CALL_UP)){
 		elev_set_button_lamp(button, floor, ON);
 	}
@@ -118,18 +123,22 @@ void evButton_pressed(elev_button_type_t button, int floor){
 	}
 }
 
-// Event time is out.
-// When time is out, close door and start elevator if there are any orders.
+/*
+	Event time is out
+When time is out, close door and start elevator if there are any orders.
+*/
 void evTime_out(){
 	elev_set_door_open_lamp(OFF);
 	drive(current_floor, motor_dir);
 }
 
-
-// Event for activated stop button.
+/*
+	Event for stop button
+If the button is pressed: Stop motor, light stop button lamp and erase queue. Open door if the elevator is at a floor.
+If the button is released: Turn off stop button lamp, close the door (regardless) and set the elevator to idle.
+*/
 void evStop_button_signal(int stop_signal, int floor_signal){
-		if (stop_signal == TRUE){	// Stop motor, light stop button and erase queue.
-			el_state = S_STOPBUTTON;
+		if (stop_signal == TRUE){
 			elev_set_motor_direction(DIRN_STOP);
 			elev_set_stop_lamp(ON);
 			queue_delete_queue();
@@ -137,6 +146,8 @@ void evStop_button_signal(int stop_signal, int floor_signal){
 			if (floor_signal > -1){	// TRUE if elevator is at a floor. Opens door.
 				elev_set_door_open_lamp(ON);
 			}
+			
+			el_state = S_STOPBUTTON;
 		} else{
 			elev_set_stop_lamp(OFF);
 			elev_set_door_open_lamp(OFF);
@@ -157,6 +168,7 @@ static void drive(int temp_floor, int temp_dir){
 			
 			el_state = S_MOVING;
 	} else{
+		
 		el_state = S_IDLE;
 	}
 }
